@@ -1,0 +1,3 @@
+#!/bin/bash
+expected="$(readlink -m $(dirname "${0}"))/output.txt"
+diff "${expected}" -

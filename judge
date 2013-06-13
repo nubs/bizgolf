@@ -1,0 +1,28 @@
+#!/bin/bash
+basedir="$(readlink -m $(dirname "${0}"))"
+temppath="$(mktemp -d)"
+tempBase="$(basename "${temppath}")"
+
+language="${1}"
+hole="${2}"
+script="${3}"
+
+cd "${temppath}"
+
+cp "${script}" userScript
+
+cat >Dockerfile <<EODF
+FROM ${language}
+
+ADD userScript /tmp/userScript
+
+CMD ["/tmp/execute", "/tmp/userScript"]
+EODF
+
+docker build -t "${tempBase}" .
+
+containerId="$(docker run -d "${tempBase}")"
+exitStatus="$(docker wait "${containerId}")"
+logs="$(docker logs "${containerId}")"
+
+echo -n "${logs}" | "${basedir}/holes/${hole}/validate"
