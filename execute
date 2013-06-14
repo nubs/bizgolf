@@ -1,0 +1,6 @@
+#!/bin/bash
+image="${1}"
+
+containerId="$(docker run -d "${image}")"
+exitStatus="$(docker wait "${containerId}")"
+docker logs "${containerId}"

@@ -21,8 +21,4 @@ EODF
 
 docker build -t "${tempBase}" .
 
-containerId="$(docker run -d "${tempBase}")"
-exitStatus="$(docker wait "${containerId}")"
-logs="$(docker logs "${containerId}")"
-
-echo -n "${logs}" | "${basedir}/holes/${hole}/validate"
+${basedir}/holes/${hole}/validate "${tempBase}"

@@ -1,3 +1,7 @@
 #!/bin/bash
-expected="$(readlink -m $(dirname "${0}"))/output.txt"
-diff "${expected}" -
+image="${1}"
+
+holeDir="$(readlink -m $(dirname "${0}"))"
+baseDir="$(dirname "$(dirname "${holeDir}")")"
+
+${baseDir}/execute "${image}" | diff "${holeDir}/output.txt" -
