@@ -1,9 +1,0 @@
-#!/bin/bash
-basedir="$(readlink -m $(dirname "${0}"))"
-
-language="${1}"
-hole="${2}"
-script="${3}"
-
-image="$(${basedir}/createImage "${language}" "${script}")"
-${basedir}/holes/${hole}/validate "${image}"

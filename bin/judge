@@ -1,0 +1,9 @@
+#!/bin/bash
+baseDir="$(readlink -m "$(dirname "$(dirname "${0}")")")"
+
+language="${1}"
+hole="${2}"
+script="${3}"
+
+image="$(${baseDir}/bin/createImage "${language}" "${script}")"
+${baseDir}/holes/${hole}/validate "${image}"

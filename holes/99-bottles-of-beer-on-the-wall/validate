@@ -4,4 +4,4 @@ image="${1}"
 holeDir="$(readlink -m $(dirname "${0}"))"
 baseDir="$(dirname "$(dirname "${holeDir}")")"
 
-${baseDir}/execute "${image}" | diff "${holeDir}/output.txt" -
+${baseDir}/bin/execute "${image}" | diff "${holeDir}/output.txt" -
