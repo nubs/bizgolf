@@ -9,7 +9,12 @@ verifyImage="$(${baseDir}/createImage "php-5.5" "${holeDir}/fizzbuzz.php")"
 function verify() {
     local num="${1}"
 
-    diff <(${baseDir}/execute -c "NUM=${num}" "${verifyImage}") <(${baseDir}/execute -c "NUM=${num}" "${image}") || exit 1
+    correctOutput="$(mktemp)"
+    ${baseDir}/execute -c "NUM=${num}" "${verifyImage}" > "${correctOutput}"
+
+    scriptOutput="$(mktemp)"
+    ${baseDir}/execute -c "NUM=${num}" "${image}" > "${scriptOutput}"
+    diff "${correctOutput}" "${scriptOutput}" || exit 1
 }
 
 verify 100
