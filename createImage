@@ -1,0 +1,20 @@
+#!/bin/bash
+temppath="$(mktemp -d)"
+tempBase="$(basename "${temppath}")"
+
+language="${1}"
+script="${2}"
+
+cd "${temppath}"
+
+cp "${script}" userScript
+
+cat >Dockerfile <<EODF
+FROM ${language}
+
+ADD userScript /tmp/userScript
+EODF
+
+docker build -t "${tempBase}" . >/dev/null 2>&1
+
+echo "${tempBase}"
