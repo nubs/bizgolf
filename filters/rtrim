@@ -1,0 +1,2 @@
+#!/usr/bin/env php
+<?=rtrim(file_get_contents('php://stdin'));

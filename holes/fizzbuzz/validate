@@ -10,10 +10,10 @@ function verify() {
     local num="${1}"
 
     correctOutput="$(mktemp)"
-    ${baseDir}/bin/execute -c "NUM=${num}" "${verifyImage}" > "${correctOutput}"
+    ${baseDir}/bin/execute -c "NUM=${num}" "${verifyImage}" | ${baseDir}/filters/rtrim > "${correctOutput}"
 
     scriptOutput="$(mktemp)"
-    ${baseDir}/bin/execute -c "NUM=${num}" "${image}" > "${scriptOutput}"
+    ${baseDir}/bin/execute -c "NUM=${num}" "${image}" | ${baseDir}/filters/rtrim > "${scriptOutput}"
     diff "${correctOutput}" "${scriptOutput}" || exit 1
 }
 
