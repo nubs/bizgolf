@@ -1,13 +1,12 @@
 #!/bin/bash
-temppath="$(mktemp -d)"
-tempBase="$(basename "${temppath}")"
+tempPath="$(mktemp -d)"
+tempBase="$(basename "${tempPath}")"
 
 language="${1}"
 script="${2}"
 
-cd "${temppath}"
-
-cp "${script}" userScript
+cp "${script}" "${tempPath}/userScript" || exit 1
+cd "${tempPath}"
 
 cat >Dockerfile <<EODF
 FROM ${language}
