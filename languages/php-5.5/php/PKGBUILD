@@ -1,12 +1,12 @@
 pkgname=php
-pkgver=5.5.0RC3
+pkgver=5.5.0
 pkgrel=1
 arch=('i686' 'x86_64')
 license=('PHP')
 url='http://www.php.net'
 makedepends=()
-source=("http://downloads.php.net/dsp/${pkgname}-${pkgver}.tar.bz2")
-md5sums=('338b25d3cdd907116896aef47eb40cba')
+source=("http://www.php.net/distributions/${pkgname}-${pkgver}.tar.bz2")
+md5sums=('daf2d54e79def9fd0fb2ac7dfcefb7f3')
 
 build() {
     local _phpconfig="--srcdir=../${pkgname}-${pkgver} \
