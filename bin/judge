@@ -1,9 +1,17 @@
-#!/bin/bash
-baseDir="$(readlink -m "$(dirname "$(dirname "${0}")")")"
+#!/usr/bin/env php
+<?php
+$baseDir = dirname(__DIR__);
 
-language="${1}"
-hole="${2}"
-script="${3}"
+$language = $argv[1];
+$hole = $argv[2];
+$script = $argv[3];
 
-image="$(${baseDir}/bin/createImage "${language}" "${script}")" || exit 1
-${baseDir}/holes/${hole}/validate "${image}"
+require_once "{$baseDir}/src/helpers.php";
+$hole = require_once "{$baseDir}/holes/${hole}/validate.php";
+
+$image = createImage($language, $script);
+if ($image === null) {
+    exit(1);
+}
+
+exit((int)!$hole($image));

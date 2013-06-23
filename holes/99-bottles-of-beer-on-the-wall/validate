@@ -1,7 +1,0 @@
-#!/bin/bash
-image="${1}"
-
-holeDir="$(readlink -m $(dirname "${0}"))"
-baseDir="$(dirname "$(dirname "${holeDir}")")"
-
-${baseDir}/bin/execute "${image}" | ${baseDir}/filters/trim | diff "${holeDir}/output.txt" -
