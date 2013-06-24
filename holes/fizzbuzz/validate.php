@@ -1,4 +1,6 @@
 <?php
+namespace Codegolf;
+
 return function($image) {
     $holeDir = __DIR__;
 

@@ -1,4 +1,6 @@
 <?php
+namespace Codegolf;
+
 function createImage($language, $script)
 {
     $tempPath = trim(`mktemp -d`);
