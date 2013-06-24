@@ -8,7 +8,7 @@ return function($image) {
         $result = execute($image, "NUM={$num}");
         $correctResult = execute($correctImage, "NUM={$num}");
 
-        return $result['exitStatus'] == 0 && rtrim($result['output']) === rtrim($correctResult['output']);
+        return $result['exitStatus'] === 0 && rtrim($result['output']) === rtrim($correctResult['output']);
     };
 
     $values = [100, 1000];

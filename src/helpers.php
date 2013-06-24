@@ -28,6 +28,8 @@ function execute($image, $constant = null)
     }
 
     $exitStatus = trim(`docker wait {$containerId}`);
+    $exitStatus = is_numeric($exitStatus) ? (int)$exitStatus : null;
+
     $output = trim(`docker logs {$containerId}`);
 
     return ['exitStatus' => $exitStatus, 'output' => $output];

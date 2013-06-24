@@ -4,5 +4,5 @@ return function($image) {
 
     $result = execute($image);
 
-    return $result['exitStatus'] == 0 && trim($result['output']) === file_get_contents("{$holeDir}/output.txt");
+    return $result['exitStatus'] === 0 && trim($result['output']) === file_get_contents("{$holeDir}/output.txt");
 };
