@@ -1,17 +1,10 @@
 #!/usr/bin/env php
 <?php
 $baseDir = dirname(__DIR__);
+require_once "{$baseDir}/src/helpers.php";
 
 $language = $argv[1];
 $hole = $argv[2];
 $script = $argv[3];
 
-require_once "{$baseDir}/src/helpers.php";
-$hole = require_once "{$baseDir}/holes/${hole}/validate.php";
-
-$image = createImage($language, $script);
-if ($image === null) {
-    exit(1);
-}
-
-exit((int)!$hole($image));
+exit((int)!judge($language, $hole, $script));

@@ -34,3 +34,17 @@ function execute($image, $constant = null)
 
     return ['exitStatus' => $exitStatus, 'output' => $output];
 }
+
+function judge($language, $hole, $script)
+{
+    $baseDir = dirname(__DIR__);
+
+    $hole = require_once "{$baseDir}/holes/${hole}/validate.php";
+
+    $image = createImage($language, $script);
+    if ($image === null) {
+        return false;
+    }
+
+    return $hole($image);
+}
