@@ -43,12 +43,12 @@ function judge($language, $hole, $script)
 {
     $baseDir = dirname(__DIR__);
 
-    $hole = require_once "{$baseDir}/holes/${hole}/validate.php";
+    $hole = require_once "{$baseDir}/holes/${hole}.php";
 
     $image = createImage($language, $script);
     if ($image === null) {
         return false;
     }
 
-    return $hole($image);
+    return $hole['validate']($image);
 }
