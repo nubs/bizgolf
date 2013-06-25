@@ -24,8 +24,10 @@ function createImage($language, $script)
 function execute($image, $constant = null)
 {
     if ($constant === null) {
+        file_put_contents('php://stderr', "Executing script on docker image {$image}\n");
         $containerId = trim(`docker run -d {$image} /tmp/execute /tmp/userScript`);
     } else {
+        file_put_contents('php://stderr', "Executing script on docker image {$image} with constant {$constant}\n");
         $containerId = trim(`docker run -d {$image} /tmp/execute -c {$constant} /tmp/userScript`);
     }
 
