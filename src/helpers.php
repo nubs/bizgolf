@@ -50,5 +50,63 @@ function judge($language, $hole, $script)
         return false;
     }
 
-    return $hole['validate']($image);
+    $constantName = getValue($hole, 'constantName');
+    $constantValues = getValue($hole, 'constantValues');
+
+    if ($constantName !== null && $constantValues !== null) {
+        foreach ($constantValues as $constantValue) {
+            ob_start();
+            $sample = getValue($hole, 'sample', [$constantValue]);
+            if ($sample === null) {
+                $sample = ob_get_contents();
+            }
+
+            ob_end_clean();
+
+            $result = execute($image, "{$constantName}={$constantValue}");
+            if ($result['exitStatus'] !== 0) {
+                return false;
+            }
+
+            $output = getValue($hole, 'trim', [$result['output']]);
+            $sample = getValue($hole, 'trim', [$sample]);
+
+            if ($output !== $sample) {
+                return false;
+            }
+        }
+
+        return true;
+    } else {
+        ob_start();
+        $sample = getValue($hole, 'sample');
+        if ($sample === null) {
+            $sample = ob_get_contents();
+        }
+
+        ob_end_clean();
+
+        $result = execute($image);
+        if ($result['exitStatus'] !== 0) {
+            return false;
+        }
+
+        $output = getValue($hole, 'trim', [$result['output']]);
+        $sample = getValue($hole, 'trim', [$sample]);
+
+        return $sample === $output;
+    }
+}
+
+function getValue(array $array, $value, array $args = [])
+{
+    if (empty($array[$value])) {
+        return null;
+    }
+
+    if (is_callable($array[$value])) {
+        return call_user_func_array($array[$value], $args);
+    }
+
+    return $array[$value];
 }

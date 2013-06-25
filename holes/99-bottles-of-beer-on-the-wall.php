@@ -2,11 +2,17 @@
 namespace Codegolf;
 
 return [
-    'validate' => function($image) {
-        $holeDir = __DIR__ . '/99-bottles-of-beer-on-the-wall';
-
-        $result = execute($image);
-
-        return $result['exitStatus'] === 0 && trim($result['output']) === file_get_contents("{$holeDir}/output.txt");
+    'trim' => 'trim',
+    'sample' => function() {
+        for ($x = 99; $x > 0;) {
+            $b = "{$x} bottle" . ($x > 1 ? 's' : '');
+            echo "{$b} of beer on the wall, {$b} of beer.\n";
+            $x--;
+            if ($x > 0) {
+                echo "Take one down and pass it around, {$x} bottle" . ($x > 1 ? 's' : '') . " of beer on the wall.\n\n";
+            } else {
+                echo 'Go to the store and buy some more, 99 bottles of beer on the wall.';
+            }
+        }
     },
 ];
