@@ -1,40 +1,52 @@
 <?php
 namespace Codegolf;
 
+function localExecute($command)
+{
+    $output = null;
+    $returnValue = null;
+    exec($command, $output, $returnValue);
+
+    if ($returnValue !== 0) {
+        throw new Exception("Failure detected with command {$command} - return status {$returnValue}");
+    }
+
+    return implode("\n", $output);
+}
+
 function createImage($language, $script)
 {
-    $tempPath = trim(`mktemp -d`);
+    $tempPath = localExecute('mktemp -d');
     $tempBase = basename($tempPath);
 
     if (!copy($script, "{$tempPath}/userScript")) {
-        return null;
+        throw new Exception("Failed to copy script to {$tempPath}");
     }
 
-    chdir($tempPath);
+    if (!file_put_contents("{$tempPath}/Dockerfile", "FROM {$language}\nADD userScript /tmp/userScript")) {
+        throw new Exception('Failed to create Dockerfile');
+    }
 
-    file_put_contents("{$tempPath}/Dockerfile", "FROM {$language}\nADD userScript /tmp/userScript");
+    localExecute('docker build -t ' . escapeshellarg($tempBase) . ' ' . escapeshellarg($tempPath));
 
-    $output = null;
-    $ret = null;
-    exec("docker build -t {$tempBase} {$tempPath}", $output, $ret);
-
-    return $ret === null ? null : $tempBase;
+    return $tempBase;
 }
 
 function execute($image, $constant = null)
 {
-    if ($constant === null) {
-        file_put_contents('php://stderr', "Executing script on docker image {$image}\n");
-        $containerId = trim(`docker run -d {$image} /tmp/execute /tmp/userScript`);
-    } else {
-        file_put_contents('php://stderr', "Executing script on docker image {$image} with constant {$constant}\n");
-        $containerId = trim(`docker run -d {$image} /tmp/execute -c {$constant} /tmp/userScript`);
+    $progressString = "Executing script on docker image {$image}";
+    if ($constant !== null) {
+        $progressString .= " with constant {$constant}";
+        $constant = '-c ' . escapeshellarg($constant);
     }
 
-    $exitStatus = trim(`docker wait {$containerId}`);
+    file_put_contents('php://stderr', "{$progressString}\n");
+    $containerId = localExecute('docker run -d ' . escapeshellarg($image) . " /tmp/execute {$constant} /tmp/userScript");
+
+    $exitStatus = localExecute('docker wait ' . escapeshellarg($containerId));
     $exitStatus = is_numeric($exitStatus) ? (int)$exitStatus : null;
 
-    $output = trim(`docker logs {$containerId}`);
+    $output = localExecute('docker logs ' . escapeshellarg($containerId));
 
     return ['exitStatus' => $exitStatus, 'output' => $output];
 }
@@ -46,9 +58,6 @@ function judge($language, $hole, $script)
     $hole = require_once "{$baseDir}/holes/${hole}.php";
 
     $image = createImage($language, $script);
-    if ($image === null) {
-        return false;
-    }
 
     $constantName = getValue($hole, 'constantName');
     $constantValues = getValue($hole, 'constantValues');
