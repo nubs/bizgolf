@@ -8,7 +8,7 @@ function localExecute($command)
     exec($command, $output, $returnValue);
 
     if ($returnValue !== 0) {
-        throw new Exception("Failure detected with command {$command} - return status {$returnValue}");
+        throw new \Exception("Failure detected with command {$command} - return status {$returnValue}");
     }
 
     return implode("\n", $output);
@@ -20,11 +20,11 @@ function createImage($language, $script)
     $tempBase = basename($tempPath);
 
     if (!copy($script, "{$tempPath}/userScript")) {
-        throw new Exception("Failed to copy script to {$tempPath}");
+        throw new \Exception("Failed to copy script to {$tempPath}");
     }
 
     if (!file_put_contents("{$tempPath}/Dockerfile", "FROM {$language}\nADD userScript /tmp/userScript")) {
-        throw new Exception('Failed to create Dockerfile');
+        throw new \Exception('Failed to create Dockerfile');
     }
 
     localExecute('docker build -t ' . escapeshellarg($tempBase) . ' ' . escapeshellarg($tempPath));
