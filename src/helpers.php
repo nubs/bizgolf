@@ -3,20 +3,27 @@ namespace Codegolf;
 
 function localExecute($command)
 {
-    $output = null;
-    $returnValue = null;
-    exec($command, $output, $returnValue);
-
-    if ($returnValue !== 0) {
-        throw new \Exception("Failure detected with command {$command} - return status {$returnValue}");
+    $pipes = null;
+    $process = proc_open($command, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+    if ($process === false) {
+        throw new \Exception("Error executing command '{$command}' with proc_open.");
     }
 
-    return implode("\n", $output);
+    $stdout = stream_get_contents($pipes[1]);
+    $stderr = stream_get_contents($pipes[2]);
+    $returnValue = proc_close($process);
+
+    if ($returnValue !== 0) {
+        throw new \Exception("Failure detected with command '{$command}' - return status {$returnValue}");
+    }
+
+    return [$stdout, $stderr];
 }
 
 function createImage($language, $script)
 {
-    $tempPath = localExecute('mktemp -d');
+    list($tempPath) = localExecute('mktemp -d');
+    $tempPath = trim($tempPath);
     $tempBase = basename($tempPath);
 
     if (!copy($script, "{$tempPath}/userScript")) {
@@ -41,12 +48,14 @@ function execute($image, $constant = null)
     }
 
     file_put_contents('php://stderr', "{$progressString}\n");
-    $containerId = localExecute('docker run -d ' . escapeshellarg($image) . " /tmp/execute {$constant} /tmp/userScript");
+    list($containerId) = localExecute('docker run -d ' . escapeshellarg($image) . " /tmp/execute {$constant} /tmp/userScript");
+    $containerId = trim($containerId);
 
-    $exitStatus = localExecute('docker wait ' . escapeshellarg($containerId));
+    list($exitStatus) = localExecute('docker wait ' . escapeshellarg($containerId));
+    $exitStatus = trim($exitStatus);
     $exitStatus = is_numeric($exitStatus) ? (int)$exitStatus : null;
 
-    $output = localExecute('docker logs ' . escapeshellarg($containerId));
+    list($output) = localExecute('docker logs ' . escapeshellarg($containerId));
 
     return ['exitStatus' => $exitStatus, 'output' => $output];
 }
