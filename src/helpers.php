@@ -122,15 +122,15 @@ function judge($language, $hole, $script)
     }
 }
 
-function getValue(array $array, $value, array $args = [])
+function getValue(array $array, $key, array $args = [])
 {
-    if (empty($array[$value])) {
+    if (!array_key_exists($key, $array)) {
         return null;
     }
 
-    if (is_callable($array[$value])) {
-        return call_user_func_array($array[$value], $args);
+    if (is_callable($array[$key])) {
+        return call_user_func_array($array[$key], $args);
     }
 
-    return $array[$value];
+    return $array[$key];
 }
