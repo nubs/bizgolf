@@ -86,8 +86,11 @@ function judge($language, $hole, $script)
                 return false;
             }
 
-            $output = getValue($hole, 'trim', [$result['output']]);
-            $sample = getValue($hole, 'trim', [$sample]);
+            $output = $result['output'];
+            if (array_key_exists('trim', $hole)) {
+                $output = $hole['trim']($output);
+                $sample = $hole['trim']($sample);;
+            }
 
             if ($output !== $sample) {
                 return false;
@@ -109,8 +112,11 @@ function judge($language, $hole, $script)
             return false;
         }
 
-        $output = getValue($hole, 'trim', [$result['output']]);
-        $sample = getValue($hole, 'trim', [$sample]);
+        $output = $result['output'];
+        if (array_key_exists('trim', $hole)) {
+            $output = $hole['trim']($output);
+            $sample = $hole['trim']($sample);;
+        }
 
         return $sample === $output;
     }
