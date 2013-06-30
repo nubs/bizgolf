@@ -9,4 +9,9 @@ $language = $argv[1];
 $hole = $argv[2];
 $script = $argv[3];
 
-exit((int)!judge($language, $hole, $script));
+try {
+    exit((int)!judge($language, $hole, $script));
+} catch (\Exception $e) {
+    file_put_contents('php://stderr', "Exception caught: {$e->getMessage()}\n");
+    exit(1);
+}
