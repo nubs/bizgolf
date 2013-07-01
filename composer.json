@@ -1,0 +1,19 @@
+{
+    "name": "nubs/codegolf",
+    "description": "A codegolf server framework.",
+    "keywords": ["codegolf"],
+    "authors": [
+        {
+            "name": "Spencer Rinehart",
+            "email": "spencer.rinehart@dominionenterprises.com",
+            "role": "Developer"
+        }
+    ],
+    "license": "MIT",
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "bin": [
+      "bin/judge"
+    ]
+}
