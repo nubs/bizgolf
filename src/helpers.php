@@ -71,31 +71,7 @@ function judge($language, $hole, $script)
     $constantName = getValue($hole, 'constantName');
     $constantValues = getValue($hole, 'constantValues');
 
-    if ($constantName !== null && $constantValues !== null) {
-        foreach ($constantValues as $constantValue) {
-            $sample = getValue($hole, 'sample', [$constantValue]);
-
-            $result = execute($image, "{$constantName}={$constantValue}");
-            if ($result['exitStatus'] !== 0) {
-                return false;
-            }
-
-            $output = $result['output'];
-            if (array_key_exists('trim', $hole)) {
-                $output = $hole['trim']($output);
-                $sample = $hole['trim']($sample);;
-            }
-
-            if ($output !== $sample) {
-                return false;
-            }
-        }
-
-        return true;
-    } else {
-        $sample = getValue($hole, 'sample');
-
-        $result = execute($image);
+    $checkResult = function($sample, $result) use($hole) {
         if ($result['exitStatus'] !== 0) {
             return false;
         }
@@ -103,10 +79,22 @@ function judge($language, $hole, $script)
         $output = $result['output'];
         if (array_key_exists('trim', $hole)) {
             $output = $hole['trim']($output);
-            $sample = $hole['trim']($sample);;
+            $sample = $hole['trim']($sample);
         }
 
-        return $sample === $output;
+        return $output === $sample;
+    };
+
+    if ($constantName !== null && $constantValues !== null) {
+        foreach ($constantValues as $constantValue) {
+            if (!$checkResult(getValue($hole, 'sample', [$constantValue]), execute($image, "{$constantName}={$constantValue}"))) {
+                return false;
+            }
+        }
+
+        return true;
+    } else {
+        return $checkResult(getValue($hole, 'sample'), execute($image));
     }
 }
 
