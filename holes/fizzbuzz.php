@@ -13,15 +13,19 @@ return [
     },
     'trim' => 'rtrim',
     'sample' => function($num) {
+        $result = '';
         for ($i = 1; $i <= $num; $i++) {
-            if ($i % 15 == 0)
-                echo "FizzBuzz\n";
-            elseif ($i % 3 == 0)
-                echo "Fizz\n";
-            elseif ($i % 5 == 0)
-                echo "Buzz\n";
-            else
-                echo "$i\n";
+            if ($i % 15 == 0) {
+                $result .= "FizzBuzz\n";
+            } elseif ($i % 3 == 0) {
+                $result .= "Fizz\n";
+            } elseif ($i % 5 == 0) {
+                $result .= "Buzz\n";
+            } else {
+                $result .= "$i\n";
+            }
         }
+
+        return $result;
     },
 ];

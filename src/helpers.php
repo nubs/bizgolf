@@ -73,13 +73,7 @@ function judge($language, $hole, $script)
 
     if ($constantName !== null && $constantValues !== null) {
         foreach ($constantValues as $constantValue) {
-            ob_start();
             $sample = getValue($hole, 'sample', [$constantValue]);
-            if ($sample === null) {
-                $sample = ob_get_contents();
-            }
-
-            ob_end_clean();
 
             $result = execute($image, "{$constantName}={$constantValue}");
             if ($result['exitStatus'] !== 0) {
@@ -99,13 +93,7 @@ function judge($language, $hole, $script)
 
         return true;
     } else {
-        ob_start();
         $sample = getValue($hole, 'sample');
-        if ($sample === null) {
-            $sample = ob_get_contents();
-        }
-
-        ob_end_clean();
 
         $result = execute($image);
         if ($result['exitStatus'] !== 0) {
