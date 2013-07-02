@@ -60,12 +60,15 @@ function execute($image, $constant = null)
     return ['exitStatus' => $exitStatus, 'output' => $output];
 }
 
-function judge($language, $hole, $script)
+function loadHole($holeName)
 {
     $baseDir = dirname(__DIR__);
 
-    $hole = require_once "{$baseDir}/holes/${hole}.php";
+    return require_once "{$baseDir}/holes/${holeName}.php";
+}
 
+function judge($language, $hole, $script)
+{
     $image = createImage($language, $script);
 
     $constantName = getValue($hole, 'constantName');
