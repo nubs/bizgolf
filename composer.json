@@ -15,5 +15,8 @@
     },
     "bin": [
       "bin/judge"
-    ]
+    ],
+    "autoload": {
+      "files": ["src/helpers.php"]
+    }
 }
