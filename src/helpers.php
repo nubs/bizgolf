@@ -67,10 +67,8 @@ function loadHole($holeName)
     return require_once "{$baseDir}/holes/${holeName}.php";
 }
 
-function judge($language, $hole, $script)
+function judge($hole, $image)
 {
-    $image = createImage($language, $script);
-
     $constantName = getValue($hole, 'constantName');
     $constantValues = getValue($hole, 'constantValues');
 
