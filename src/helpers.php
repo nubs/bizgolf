@@ -55,9 +55,9 @@ function execute($image, $constant = null)
     $exitStatus = trim($exitStatus);
     $exitStatus = is_numeric($exitStatus) ? (int)$exitStatus : null;
 
-    list($output) = localExecute('docker logs ' . escapeshellarg($containerId));
+    list($output, $stderr) = localExecute('docker logs ' . escapeshellarg($containerId));
 
-    return ['exitStatus' => $exitStatus, 'output' => $output, 'constant' => $constant];
+    return ['exitStatus' => $exitStatus, 'output' => $output, 'stderr' => $stderr, 'constant' => $constant];
 }
 
 function loadHole($holeName)
