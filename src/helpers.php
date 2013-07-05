@@ -44,11 +44,11 @@ function execute($image, $constant = null)
     $progressString = "Executing script on docker image {$image}";
     if ($constant !== null) {
         $progressString .= " with constant {$constant}";
-        $constant = '-c ' . escapeshellarg($constant);
+        $constantArgument = '-c ' . escapeshellarg($constant);
     }
 
     file_put_contents('php://stderr', "{$progressString}\n");
-    list($containerId) = localExecute('docker run -d ' . escapeshellarg($image) . " /tmp/execute {$constant} /tmp/userScript");
+    list($containerId) = localExecute('docker run -d ' . escapeshellarg($image) . " /tmp/execute {$constantArgument} /tmp/userScript");
     $containerId = trim($containerId);
 
     list($exitStatus) = localExecute('docker wait ' . escapeshellarg($containerId));
@@ -57,7 +57,7 @@ function execute($image, $constant = null)
 
     list($output) = localExecute('docker logs ' . escapeshellarg($containerId));
 
-    return ['exitStatus' => $exitStatus, 'output' => $output];
+    return ['exitStatus' => $exitStatus, 'output' => $output, 'constant' => $constant];
 }
 
 function loadHole($holeName)
