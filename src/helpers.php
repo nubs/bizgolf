@@ -73,8 +73,11 @@ function judge($hole, $image)
     $constantValues = getValue($hole, 'constantValues');
 
     $checkResult = function($sample, $result) use($hole) {
+        $result['sample'] = $sample;
+
         if ($result['exitStatus'] !== 0) {
-            return false;
+            $result['result'] = false;
+            return $result;
         }
 
         $output = $result['output'];
@@ -83,17 +86,19 @@ function judge($hole, $image)
             $sample = $hole['trim']($sample);
         }
 
-        return $output === $sample;
+        $result['result'] = $output === $sample;
+        return $result;
     };
 
     if ($constantName !== null && $constantValues !== null) {
         foreach ($constantValues as $constantValue) {
-            if (!$checkResult(getValue($hole, 'sample', [$constantValue]), execute($image, "{$constantName}={$constantValue}"))) {
-                return false;
+            $result = $checkResult(getValue($hole, 'sample', [$constantValue]), execute($image, "{$constantName}={$constantValue}"));
+            if (!$result['result']) {
+                return $result;
             }
         }
 
-        return true;
+        return $result;
     } else {
         return $checkResult(getValue($hole, 'sample'), execute($image));
     }

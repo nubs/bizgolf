@@ -10,7 +10,8 @@ $holeName = $argv[2];
 $script = $argv[3];
 
 try {
-    exit((int)!judge(loadHole($holeName), createImage($language, $script)));
+    $result = judge(loadHole($holeName), createImage($language, $script));
+    exit((int)!$result['result']);
 } catch (\Exception $e) {
     file_put_contents('php://stderr', "Exception caught: {$e->getMessage()}\n");
     exit(1);
