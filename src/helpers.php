@@ -42,6 +42,7 @@ function createImage($language, $script)
 function execute($image, $constant = null)
 {
     $progressString = "Executing script on docker image {$image}";
+    $constantArgument = '';
     if ($constant !== null) {
         $progressString .= " with constant {$constant}";
         $constantArgument = '-c ' . escapeshellarg($constant);
