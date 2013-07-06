@@ -89,13 +89,12 @@ function judge($hole, $image)
             return $result;
         }
 
-        $output = $result['output'];
         if (array_key_exists('trim', $hole)) {
-            $output = $hole['trim']($output);
-            $sample = $hole['trim']($sample);
+            $result['output'] = $hole['trim']($result['output']);
+            $result['sample'] = $hole['trim']($result['sample']);
         }
 
-        $result['result'] = $output === $sample;
+        $result['result'] = $result['output'] === $result['sample'];
         return $result;
     };
 
