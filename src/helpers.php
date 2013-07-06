@@ -20,6 +20,14 @@ function localExecute($command)
     return [$stdout, $stderr];
 }
 
+/**
+ * Creates a docker image based on the requested language with the given user script added to the image for execution.
+ *
+ * @param string $language One of the supported languages.
+ * @param string $script The file path to the user's submission to test.
+ * @return string The docker image id that was created.
+ * @throws Exception if unable to create docker image
+ */
 function createImage($language, $script)
 {
     list($tempPath) = localExecute('mktemp -d');
@@ -69,6 +77,20 @@ function execute($image, $constant = null)
     return ['exitStatus' => $exitStatus, 'output' => $output, 'stderr' => $stderr, 'constant' => $constant];
 }
 
+/**
+ * Loads the hole configuration for an included hole.  If you want to add your own holes outside of this project, you don't need to call this
+ * function.
+ *
+ * @param string $holeName One of the included holes.
+ * @return array The hole's configuration.  Included fields:
+ *     string constantName (optional) The name of the constant that will hold input.
+ *         This may be a callable as well, with 0 arguments.
+ *     array constantValues (optional) The different values of input to test.
+ *         This may be a callable as well, with 0 arguments.
+ *     callable trim (optional) What kind of trim to apply to the results before comparison.
+ *     string sample The expected output for the hole.
+ *         This may be a callable as well, with 1 argument containing the constant value for input.
+ */
 function loadHole($holeName)
 {
     $baseDir = dirname(__DIR__);
@@ -76,6 +98,19 @@ function loadHole($holeName)
     return require_once "{$baseDir}/holes/${holeName}.php";
 }
 
+/**
+ * Judges the user submission on the given image against the given hole configuration.
+ *
+ * @param array $hole The hole's configuration.  @see loadHole() for details.
+ * @param string $image The image with the user's submission for a single language.  @see createImage() for details.
+ * @return array The results of judging the submission and the details of the submission's last run.  Included fields:
+ *     bool result Whether the submission passed the tests or not.
+ *     int exitStatus The exit status of the command.
+ *     string output The output, trimmed according to the rules of the hole.
+ *     string sample The expected output, trimmed according to the rules of the hole.
+ *     string stderr The stderr output.
+ *     string constant The constant variable and its value.
+ */
 function judge($hole, $image)
 {
     $constantName = getValue($hole, 'constantName');
