@@ -30,6 +30,14 @@ function createImage($language, $script)
         throw new \Exception("Failed to copy script to {$tempPath}");
     }
 
+    list($imageId) = localExecute('docker images -q ' . escapeshellarg($language));
+    if ($imageId === '') {
+        file_put_contents('php://stderr', "Building image for language {$language}.\n");
+
+        $baseDir = dirname(__DIR__);
+        localExecute('docker build -t ' . escapeshellarg($language) . ' ' . escapeshellarg("{$baseDir}/languages/{$language}"));
+    }
+
     if (!file_put_contents("{$tempPath}/Dockerfile", "FROM {$language}\nADD userScript /tmp/userScript")) {
         throw new \Exception('Failed to create Dockerfile');
     }
