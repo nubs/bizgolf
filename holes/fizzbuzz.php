@@ -1,6 +1,4 @@
 <?php
-namespace Codegolf;
-
 return [
     'constantName' => 'NUM',
     'constantValues' => function() {

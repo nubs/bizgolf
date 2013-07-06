@@ -1,6 +1,4 @@
 <?php
-namespace Codegolf;
-
 return [
     'trim' => 'trim',
     'sample' => function() {
