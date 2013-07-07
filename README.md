@@ -99,9 +99,9 @@ Here's an example of how it could be used to judge a user's submission:
 $holeName = 'fizzbuzz';
 $language = 'php-5.5';
 $userScript = $_FILES['submission']['tmp_name'];
-$result = \Codegolf\judge(
-    \Codegolf\loadHole($holeName),
-    \Codegolf\createImage($language, $userScript)
+$result = \Bizgolf\judge(
+    \Bizgolf\loadHole($holeName),
+    \Bizgolf\createImage($language, $userScript)
 );
 if ($result['result']) {
     echo "Successful submission!\n";

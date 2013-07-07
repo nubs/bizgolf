@@ -1,5 +1,5 @@
 <?php
-namespace Codegolf;
+namespace Bizgolf;
 
 function localExecute($command, $timeout = null)
 {

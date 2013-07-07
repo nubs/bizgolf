@@ -1,6 +1,6 @@
 #!/usr/bin/env php
 <?php
-namespace Codegolf;
+namespace Bizgolf;
 
 $baseDir = dirname(__DIR__);
 require_once "{$baseDir}/src/helpers.php";
