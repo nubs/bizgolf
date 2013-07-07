@@ -1,7 +1,7 @@
 <?php
 namespace Codegolf;
 
-function localExecute($command)
+function localExecute($command, $timeout = null)
 {
     $pipes = null;
     $process = proc_open($command, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
@@ -9,12 +9,45 @@ function localExecute($command)
         throw new \Exception("Error executing command '{$command}' with proc_open.");
     }
 
-    $stdout = stream_get_contents($pipes[1]);
-    $stderr = stream_get_contents($pipes[2]);
-    $returnValue = proc_close($process);
+    if ($timeout !== null) {
+        $timeout *= 1000000;
+    }
 
-    if ($returnValue !== 0) {
-        throw new \Exception("Failure detected with command '{$command}' - return status {$returnValue}");
+    stream_set_blocking($pipes[1], 0);
+    stream_set_blocking($pipes[2], 0);
+    $stdout = '';
+    $stderr = '';
+    $exitCode = null;
+    while ($timeout === null || $timeout > 0) {
+        $start = microtime(true);
+
+        $read = [$pipes[1], $pipes[2]];
+        $other = [];
+        stream_select($read, $other, $other, 0, $timeout);
+
+        $status = proc_get_status($process);
+
+        $stdout .= stream_get_contents($pipes[1]);
+        $stderr .= stream_get_contents($pipes[2]);
+
+        if (!$status['running']) {
+            $exitCode = $status['exitcode'];
+            break;
+        }
+
+        if ($timeout !== null) {
+            $timeout -= (microtime(true) - $start) * 1000000;
+        }
+    }
+
+    proc_terminate($process, 9);
+    $closeStatus = proc_close($process);
+    if ($exitCode === null) {
+        $exitCode = $closeStatus;
+    }
+
+    if ($exitCode !== 0) {
+        throw new \Exception("Failure detected with command '{$command}' - return status {$exitCode}");
     }
 
     return [$stdout, $stderr];
@@ -68,7 +101,7 @@ function execute($image, $constant = null)
     list($containerId) = localExecute('docker run -d ' . escapeshellarg($image) . " /tmp/execute {$constantArgument} /tmp/userScript");
     $containerId = trim($containerId);
 
-    list($exitStatus) = localExecute('docker wait ' . escapeshellarg($containerId));
+    list($exitStatus) = localExecute('docker wait ' . escapeshellarg($containerId), 10);
     $exitStatus = trim($exitStatus);
     $exitStatus = is_numeric($exitStatus) ? (int)$exitStatus : null;
 
