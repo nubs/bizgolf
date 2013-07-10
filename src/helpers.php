@@ -128,7 +128,7 @@ function loadHole($holeName)
 {
     $baseDir = dirname(__DIR__);
 
-    return require_once "{$baseDir}/holes/${holeName}.php";
+    return require "{$baseDir}/holes/${holeName}.php";
 }
 
 /**
