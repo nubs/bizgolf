@@ -140,7 +140,8 @@ function loadHole($holeName)
  * Judges the user submission on the given image against the given hole configuration.
  *
  * @param array $hole The hole's configuration.  @see loadHole() for details.
- * @param string $image The image with the user's submission for a single language.  @see createImage() for details.
+ * @param string $language One of the supported languages.
+ * @param string $script The file path to the user's submission to test.
  * @return array The results of judging the submission and the details of the submission's last run.  Included fields:
  *     bool result Whether the submission passed the tests or not.
  *     int exitStatus The exit status of the command.
@@ -149,7 +150,7 @@ function loadHole($holeName)
  *     string stderr The stderr output.
  *     string constant The constant variable and its value.
  */
-function judge($hole, $image)
+function judge($hole, $language, $script)
 {
     $constantName = empty($hole['constantName']) ? null : $hole['constantName'];
     $constantValues = empty($hole['constantValues']) ? null : $hole['constantValues'];
@@ -176,6 +177,7 @@ function judge($hole, $image)
 
     if ($constantName !== null && $constantValues !== null) {
         foreach ($constantValues as $constantValue) {
+            $image = createImage($language, $script);
             $result = $checkResult(call_user_func($hole['sample'], $constantValue), execute($image, "{$constantName}={$constantValue}"));
             if (!$result['result']) {
                 return $result;
@@ -189,6 +191,7 @@ function judge($hole, $image)
             $sample = call_user_func($sample);
         }
 
+        $image = createImage($language, $script);
         return $checkResult($sample, execute($image));
     }
 }
