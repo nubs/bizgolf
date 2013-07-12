@@ -53,6 +53,17 @@ function localExecute($command, $timeout = null)
     return [$stdout, $stderr];
 }
 
+function verifyImageForLanguage($language)
+{
+    list($imageId) = localExecute('docker images -q ' . escapeshellarg($language));
+    if ($imageId === '') {
+        file_put_contents('php://stderr', "Building image for language {$language}.\n");
+
+        $baseDir = dirname(__DIR__);
+        localExecute('docker build -t ' . escapeshellarg($language) . ' ' . escapeshellarg("{$baseDir}/languages/{$language}"));
+    }
+}
+
 /**
  * Creates a docker image based on the requested language with the given user script added to the image for execution.
  *
@@ -63,20 +74,14 @@ function localExecute($command, $timeout = null)
  */
 function createImage($language, $script)
 {
+    verifyImageForLanguage($language);
+
     list($tempPath) = localExecute('mktemp -d');
     $tempPath = trim($tempPath);
     $tempBase = basename($tempPath);
 
     if (!copy($script, "{$tempPath}/userScript")) {
         throw new \Exception("Failed to copy script to {$tempPath}");
-    }
-
-    list($imageId) = localExecute('docker images -q ' . escapeshellarg($language));
-    if ($imageId === '') {
-        file_put_contents('php://stderr', "Building image for language {$language}.\n");
-
-        $baseDir = dirname(__DIR__);
-        localExecute('docker build -t ' . escapeshellarg($language) . ' ' . escapeshellarg("{$baseDir}/languages/{$language}"));
     }
 
     if (!file_put_contents("{$tempPath}/Dockerfile", "FROM {$language}\nADD userScript /tmp/userScript")) {
