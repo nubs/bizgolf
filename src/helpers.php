@@ -146,8 +146,11 @@ function loadHole($holeName)
  */
 function judge($hole, $image)
 {
-    $constantName = getValue($hole, 'constantName');
-    $constantValues = getValue($hole, 'constantValues');
+    $constantName = empty($hole['constantName']) ? null : $hole['constantName'];
+    $constantValues = empty($hole['constantValues']) ? null : $hole['constantValues'];
+    if (is_callable($constantValues)) {
+        $constantValues = call_user_func($constantValues);
+    }
 
     $checkResult = function($sample, $result) use($hole) {
         $result['sample'] = $sample;
@@ -168,7 +171,7 @@ function judge($hole, $image)
 
     if ($constantName !== null && $constantValues !== null) {
         foreach ($constantValues as $constantValue) {
-            $result = $checkResult(getValue($hole, 'sample', [$constantValue]), execute($image, "{$constantName}={$constantValue}"));
+            $result = $checkResult(call_user_func($hole['sample'], $constantValue), execute($image, "{$constantName}={$constantValue}"));
             if (!$result['result']) {
                 return $result;
             }
@@ -176,19 +179,11 @@ function judge($hole, $image)
 
         return $result;
     } else {
-        return $checkResult(getValue($hole, 'sample'), execute($image));
-    }
-}
+        $sample = $hole['sample'];
+        if (is_callable($sample)) {
+            $sample = call_user_func($sample);
+        }
 
-function getValue(array $array, $key, array $args = [])
-{
-    if (!array_key_exists($key, $array)) {
-        return null;
+        return $checkResult($sample, execute($image));
     }
-
-    if (is_callable($array[$key])) {
-        return call_user_func_array($array[$key], $args);
-    }
-
-    return $array[$key];
 }
