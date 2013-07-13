@@ -12,5 +12,6 @@ define('{$constantName}', {$constantValue});
 ?>
 {$script}
 EOD;
-    }
+    },
+    'executeCommand' => '/usr/bin/php',
 ];

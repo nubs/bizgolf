@@ -78,12 +78,12 @@ function loadLanguage($languageName)
  * @param string $script The file path to the user's submission to test.
  * @param string|null $constantName The name of the constant to set, if a constant is being used.
  * @param mixed|null $constantValue The value of the constant to set, if a constant is being used.
- * @return string The docker image id that was created.
+ * @return array A description of the docker image that was created.
  * @throws Exception if unable to create docker image
  */
 function createImage($languageName, $script, $constantName = null, $constantValue = null)
 {
-    $language = loadLanguage($languageName);
+    $image = loadLanguage($languageName);
 
     list($tempPath) = localExecute('mktemp -d');
     $tempPath = trim($tempPath);
@@ -95,26 +95,29 @@ function createImage($languageName, $script, $constantName = null, $constantValu
     }
 
     if ($constantName !== null) {
-        $scriptContents = $language['addConstant']($scriptContents, $constantName, $constantValue);
+        $scriptContents = $image['addConstant']($scriptContents, $constantName, $constantValue);
     }
 
     if (!file_put_contents("{$tempPath}/userScript", $scriptContents)) {
         throw new \Exception('Failed to create user script in temp directory.');
     }
 
-    if (!file_put_contents("{$tempPath}/Dockerfile", "FROM {$language['tagName']}\nADD userScript /tmp/userScript")) {
+    if (!file_put_contents("{$tempPath}/Dockerfile", "FROM {$image['tagName']}\nADD userScript /tmp/userScript")) {
         throw new \Exception('Failed to create Dockerfile');
     }
 
     localExecute('docker build -t ' . escapeshellarg($tempBase) . ' ' . escapeshellarg($tempPath));
+    $image['tagName'] = $tempBase;
 
-    return $tempBase;
+    return $image;
 }
 
-function execute($image)
+function execute(array $image)
 {
-    file_put_contents('php://stderr',  "Executing script on docker image {$image}\n");
-    list($containerId) = localExecute('docker run -d ' . escapeshellarg($image) . " /tmp/execute /tmp/userScript");
+    $tagName = $image['tagName'];
+    $executeCommand = $image['executeCommand'];
+    file_put_contents('php://stderr',  "Executing script on docker image {$tagName}\n");
+    list($containerId) = localExecute('docker run -d ' . escapeshellarg($tagName) . ' ' . escapeshellarg($executeCommand) . ' /tmp/userScript');
     $containerId = trim($containerId);
 
     list($exitStatus) = localExecute('docker wait ' . escapeshellarg($containerId), 10);
