@@ -53,38 +53,55 @@ function localExecute($command, $timeout = null)
     return [$stdout, $stderr];
 }
 
-function verifyImageForLanguage($language)
+function loadLanguage($languageName)
 {
-    list($imageId) = localExecute('docker images -q ' . escapeshellarg($language));
+    $language = require "languages/{$languageName}.php";
+
+    list($imageId) = localExecute('docker images -q ' . escapeshellarg($language['tagName']));
     if ($imageId === '') {
-        file_put_contents('php://stderr', "Building image for language {$language}.\n");
+        file_put_contents('php://stderr', "Building image for language {$language['tagName']}.\n");
 
         $baseDir = dirname(__DIR__);
-        localExecute('docker build -t ' . escapeshellarg($language) . ' ' . escapeshellarg("{$baseDir}/languages/{$language}"));
+        localExecute(
+            'docker build -t ' . escapeshellarg($language['tagName']) . ' ' .  escapeshellarg("{$baseDir}/languages/{$language['tagName']}")
+        );
     }
+
+    return $language;
 }
 
 /**
  * Creates a docker image based on the requested language with the given user script added to the image for execution.
  *
- * @param string $language One of the supported languages.
+ * @param string $languageName One of the supported languages.
  * @param string $script The file path to the user's submission to test.
+ * @param mixed|null $constantName The name of the constant to set, if a constant is being used.
+ * @param mixed|null $constantValue The value of the constant to set, if a constant is being used.
  * @return string The docker image id that was created.
  * @throws Exception if unable to create docker image
  */
-function createImage($language, $script)
+function createImage($languageName, $script, $constantName = null, $constantValue = null)
 {
-    verifyImageForLanguage($language);
+    $language = loadLanguage($languageName);
 
     list($tempPath) = localExecute('mktemp -d');
     $tempPath = trim($tempPath);
     $tempBase = basename($tempPath);
 
-    if (!copy($script, "{$tempPath}/userScript")) {
-        throw new \Exception("Failed to copy script to {$tempPath}");
+    $scriptContents = file_get_contents($script);
+    if ($scriptContents === false) {
+        throw new \Exception('Failed to read user script.');
     }
 
-    if (!file_put_contents("{$tempPath}/Dockerfile", "FROM {$language}\nADD userScript /tmp/userScript")) {
+    if ($constantName !== null) {
+        $scriptContents = $language['addConstant']($scriptContents, $constantName, $constantValue);
+    }
+
+    if (!file_put_contents("{$tempPath}/userScript", $scriptContents)) {
+        throw new \Exception('Failed to create user script in temp directory.');
+    }
+
+    if (!file_put_contents("{$tempPath}/Dockerfile", "FROM {$language['tagName']}\nADD userScript /tmp/userScript")) {
         throw new \Exception('Failed to create Dockerfile');
     }
 
@@ -93,17 +110,10 @@ function createImage($language, $script)
     return $tempBase;
 }
 
-function execute($image, $constant = null)
+function execute($image)
 {
-    $progressString = "Executing script on docker image {$image}";
-    $constantArgument = '';
-    if ($constant !== null) {
-        $progressString .= " with constant {$constant}";
-        $constantArgument = '-c ' . escapeshellarg($constant);
-    }
-
-    file_put_contents('php://stderr', "{$progressString}\n");
-    list($containerId) = localExecute('docker run -d ' . escapeshellarg($image) . " /tmp/execute {$constantArgument} /tmp/userScript");
+    file_put_contents('php://stderr',  "Executing script on docker image {$image}\n");
+    list($containerId) = localExecute('docker run -d ' . escapeshellarg($image) . " /tmp/execute /tmp/userScript");
     $containerId = trim($containerId);
 
     list($exitStatus) = localExecute('docker wait ' . escapeshellarg($containerId), 10);
@@ -112,7 +122,7 @@ function execute($image, $constant = null)
 
     list($output, $stderr) = localExecute('docker logs ' . escapeshellarg($containerId));
 
-    return ['exitStatus' => $exitStatus, 'output' => $output, 'stderr' => $stderr, 'constant' => $constant];
+    return ['exitStatus' => $exitStatus, 'output' => $output, 'stderr' => $stderr];
 }
 
 /**
@@ -140,7 +150,7 @@ function loadHole($holeName)
  * Judges the user submission on the given image against the given hole configuration.
  *
  * @param array $hole The hole's configuration.  @see loadHole() for details.
- * @param string $language One of the supported languages.
+ * @param string $languageName One of the supported languages.
  * @param string $script The file path to the user's submission to test.
  * @return array The results of judging the submission and the details of the submission's last run.  Included fields:
  *     bool result Whether the submission passed the tests or not.
@@ -150,7 +160,7 @@ function loadHole($holeName)
  *     string stderr The stderr output.
  *     string constant The constant variable and its value.
  */
-function judge($hole, $language, $script)
+function judge($hole, $languageName, $script)
 {
     $constantName = empty($hole['constantName']) ? null : $hole['constantName'];
     $constantValues = empty($hole['constantValues']) ? null : $hole['constantValues'];
@@ -177,8 +187,11 @@ function judge($hole, $language, $script)
 
     if ($constantName !== null && $constantValues !== null) {
         foreach ($constantValues as $constantValue) {
-            $image = createImage($language, $script);
-            $result = $checkResult(call_user_func($hole['sample'], $constantValue), execute($image, "{$constantName}={$constantValue}"));
+            $image = createImage($languageName, $script, $constantName, $constantValue);
+            $result = $checkResult(call_user_func($hole['sample'], $constantValue), execute($image));
+            $result['constantName'] = $constantName;
+            $result['constantValue'] = $constantValue;
+
             if (!$result['result']) {
                 return $result;
             }
@@ -191,7 +204,9 @@ function judge($hole, $language, $script)
             $sample = call_user_func($sample);
         }
 
-        $image = createImage($language, $script);
-        return $checkResult($sample, execute($image));
+        $image = createImage($languageName, $script);
+        $result = $checkResult($sample, execute($image));
+        $result['constantName'] = null;
+        $result['constantValue'] = null;
     }
 }

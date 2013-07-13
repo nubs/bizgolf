@@ -1,20 +1,3 @@
 #!/bin/bash
-constant=''
-
-while getopts 'c:' opt; do
-    case "${opt}" in
-        c)
-            constant="${OPTARG}"
-            ;;
-    esac
-done
-
-shift "$(expr "${OPTIND}" - 1)"
 script="${1}"
-
-if [ -n "${constant}" ]; then
-    echo "<?define('${constant%%=*}','${constant#*=}')?>" | cat - "${script}" > "${script}-constant"
-    script="${script}-constant"
-fi
-
 php "${script}"
