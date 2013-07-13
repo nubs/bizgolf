@@ -55,7 +55,8 @@ function localExecute($command, $timeout = null)
 
 function loadLanguage($languageName)
 {
-    $language = require "languages/{$languageName}.php";
+    $baseDir = dirname(__DIR__);
+    $language = require "{$baseDir}/languages/${languageName}.php";
 
     list($imageId) = localExecute('docker images -q ' . escapeshellarg($language['tagName']));
     if ($imageId === '') {
