@@ -75,7 +75,7 @@ function loadLanguage($languageName)
  *
  * @param string $languageName One of the supported languages.
  * @param string $script The file path to the user's submission to test.
- * @param mixed|null $constantName The name of the constant to set, if a constant is being used.
+ * @param string|null $constantName The name of the constant to set, if a constant is being used.
  * @param mixed|null $constantValue The value of the constant to set, if a constant is being used.
  * @return string The docker image id that was created.
  * @throws Exception if unable to create docker image
@@ -147,7 +147,7 @@ function loadHole($holeName)
 }
 
 /**
- * Judges the user submission on the given image against the given hole configuration.
+ * Judges the user submission for a language against the given hole configuration.
  *
  * @param array $hole The hole's configuration.  @see loadHole() for details.
  * @param string $languageName One of the supported languages.
@@ -158,7 +158,8 @@ function loadHole($holeName)
  *     string output The output, trimmed according to the rules of the hole.
  *     string sample The expected output, trimmed according to the rules of the hole.
  *     string stderr The stderr output.
- *     string constant The constant variable and its value.
+ *     string|null constantName The constant's name, if used.
+ *     mixed|null constantValue The constant's value, if used.
  */
 function judge($hole, $languageName, $script)
 {
