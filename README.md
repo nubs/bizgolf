@@ -63,7 +63,7 @@ Composer's autoloader will automatically include the functions for use in your p
  *     constant is being used.
  * @param mixed|null $constantValue The value of the constant to set, if a
  *     constant is being used.
- * @return string The docker image id that was created.
+ * @return array A description of the docker image that was created.
  * @throws Exception if unable to create docker image
  */
 function createImage($language, $script);
@@ -136,14 +136,12 @@ Any changes, suggestions, or bug reports are welcome to be submitted on github. 
 ### New Languages
 Please try to make sure that the language locks down behavior so that no network access, filesystem access, or process execution is allowed.  This is to remove common "cheating" avenues such as downloading the result from a website hosting the solutions.
 
-A language should include a language definition which is a php script that returns an array containing a `tagName` (which also doubles as the directory name where the Dockerfile is located) and an `addConstant` function, which takes the user's script, a constant name, and a constant value as parameters and should return the script but with code necessary to set a constant with the name given to the value given.
+A language should include a language definition which is a php script that returns an array containing:
+* a `tagName` (which also doubles as the directory name where the Dockerfile is located),
+* an `addConstant` function, which takes the user's script, a constant name, and a constant value as parameters and should return the script but with code necessary to set a constant with the name given to the value given,
+* and an `executeCommand` string which gives the command to run.  This script will be passed the path to the user's script and should exit with the status returned from executing the user script and forward along stdout and stderr from that script.
 
-The Dockerfile should create a new Docker image with the target language installed and configured to lock down access as described.  The Dockerfile is also responsible for creating a /tmp/execute executable script in the container that will be given the path to the user script as its only argument.  For example:
-```bash
-/tmp/execute /tmp/userScript
-```
-
-This script should exit with the status returned from executing the user script and forward along stdout and stderr from that script.
+There should be a Dockerfile located in languages/`tagName`/Dockerfile that should create a new Docker image with the target language installed and configured to lock down access as described.
 
 ### New Holes
 New holes are a simple php file that returns an array containing the details of what the hole expects.  The below example (taken from fizzbuzz) shows all of the fields that are allowed:
