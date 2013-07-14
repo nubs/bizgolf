@@ -14,4 +14,22 @@ define('{$constantName}', {$constantValue});
 EOD;
     },
     'executeCommand' => '/usr/bin/php',
+    'disableFunctionality' => function(array $baseImage, $functionality) {
+        $disableFunctions = [];
+        switch ($functionality) {
+            case 'upper-case-word':
+                $disableFunctions = ['ucwords', 'ucfirst', 'mb_convert_case'];
+                break;
+        }
+
+        if (empty($disableFunctions)) {
+            return $baseImage;
+        }
+
+        return \Bizgolf\buildImage(
+            $baseImage,
+            [],
+            ["RUN sed -i '/^disable_functions/s/$/," . implode(',', $disableFunctions) . "/' /etc/php/php.ini"]
+        );
+    },
 ];

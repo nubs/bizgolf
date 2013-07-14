@@ -206,6 +206,12 @@ function judge($hole, $languageName, $script)
     if ($constantName !== null && $constantValues !== null) {
         foreach ($constantValues as $constantValue) {
             $image = createImage($languageName, $script, $constantName, $constantValue);
+            if (!empty($hole['disableFunctionality'])) {
+                foreach($hole['disableFunctionality'] as $functionality) {
+                    $image = $image['disableFunctionality']($image, $functionality);
+                }
+            }
+
             $result = $checkResult(call_user_func($hole['sample'], $constantValue), execute($image));
             $result['constantName'] = $constantName;
             $result['constantValue'] = $constantValue;
@@ -223,6 +229,12 @@ function judge($hole, $languageName, $script)
         }
 
         $image = createImage($languageName, $script);
+        if (!empty($hole['disableFunctionality'])) {
+            foreach($hole['disableFunctionality'] as $functionality) {
+                $image = $image['disableFunctionality']($image, $functionality);
+            }
+        }
+
         $result = $checkResult($sample, execute($image));
         $result['constantName'] = null;
         $result['constantValue'] = null;
