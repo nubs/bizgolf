@@ -85,10 +85,6 @@ function createImage($languageName, $script, $constantName = null, $constantValu
 {
     $image = loadLanguage($languageName);
 
-    list($tempPath) = localExecute('mktemp -d');
-    $tempPath = trim($tempPath);
-    $tempBase = basename($tempPath);
-
     $scriptContents = file_get_contents($script);
     if ($scriptContents === false) {
         throw new \Exception('Failed to read user script.');
@@ -98,18 +94,35 @@ function createImage($languageName, $script, $constantName = null, $constantValu
         $scriptContents = $image['addConstant']($scriptContents, $constantName, $constantValue);
     }
 
-    if (!file_put_contents("{$tempPath}/userScript", $scriptContents)) {
-        throw new \Exception('Failed to create user script in temp directory.');
+    return buildImage($image, ['/tmp/userScript' => $scriptContents]);
+}
+
+function buildImage($baseImage, array $files, array $commands = [])
+{
+    list($tempPath) = localExecute('mktemp -d');
+    $tempPath = trim($tempPath);
+    $tempBase = basename($tempPath);
+
+    $dockerCommands = ["FROM {$baseImage['tagName']}"];
+
+    foreach ($files as $fileName => $fileContents) {
+        $tempFile = tempnam($tempPath, 'bg');
+        if (!file_put_contents($tempFile, $fileContents)) {
+            throw new \Exception('Failed to create file in temp directory.');
+        }
+
+        $dockerCommands[] = 'ADD ' . basename($tempFile) . " {$fileName}";
     }
 
-    if (!file_put_contents("{$tempPath}/Dockerfile", "FROM {$image['tagName']}\nADD userScript /tmp/userScript")) {
+    $dockerCommands = array_merge($dockerCommands, $commands);
+    if (!file_put_contents("{$tempPath}/Dockerfile", implode("\n", $dockerCommands))) {
         throw new \Exception('Failed to create Dockerfile');
     }
 
     localExecute('docker build -t ' . escapeshellarg($tempBase) . ' ' . escapeshellarg($tempPath));
-    $image['tagName'] = $tempBase;
+    $baseImage['tagName'] = $tempBase;
 
-    return $image;
+    return $baseImage;
 }
 
 function execute(array $image)
