@@ -11,5 +11,3 @@ ADD php /tmp/php
 RUN bash -c 'cd /tmp/php; makepkg -ci --asroot --noconfirm'
 
 ADD php.ini /etc/php/php.ini
-
-ADD execute /tmp/execute
