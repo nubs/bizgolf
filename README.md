@@ -36,7 +36,7 @@ The expected usage of this library is through the included php functions.  Add t
 ```json
 {
     "require": {
-        "nubs/codegolf": "dev-master"
+        "nubs/bizgolf": "dev-master"
     }
 }
 ```
