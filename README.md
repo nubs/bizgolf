@@ -27,6 +27,8 @@ A growing list of holes will be included along with this library, making it easy
 ## Requirements
 The host library is currently written in PHP, but it's a small library that could be easily ported to another language.  Some features from php 5.4 are used, so make sure you are running at least 5.4.
 
+Required libraries are pulled in using [Composer](http://getcomposer.org).  They will be automatically installed if you use composer to install the library and use its autoloader.
+
 For executing user code, [Docker](http://www.docker.io) is used.  It has somewhat strict requirements, but people have gotten it working on a wide number of environments and there is ongoing efforts to make it operable on many more environments.  Take a look at its documentation for getting it installed on your system.
 
 No additional requirements should be needed, docker takes care of getting the execution environment setup for each language.
