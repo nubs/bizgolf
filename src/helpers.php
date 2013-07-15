@@ -1,71 +1,17 @@
 <?php
 namespace Bizgolf;
 
-function localExecute($command, $timeout = null)
-{
-    $pipes = null;
-    $process = proc_open($command, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
-    if ($process === false) {
-        throw new \Exception("Error executing command '{$command}' with proc_open.");
-    }
-
-    if ($timeout !== null) {
-        $timeout *= 1000000;
-    }
-
-    stream_set_blocking($pipes[1], 0);
-    stream_set_blocking($pipes[2], 0);
-    $stdout = '';
-    $stderr = '';
-    $exitCode = null;
-    while ($timeout === null || $timeout > 0) {
-        $start = microtime(true);
-
-        $read = [$pipes[1], $pipes[2]];
-        $other = [];
-        stream_select($read, $other, $other, 0, $timeout);
-
-        $status = proc_get_status($process);
-
-        $stdout .= stream_get_contents($pipes[1]);
-        $stderr .= stream_get_contents($pipes[2]);
-
-        if (!$status['running']) {
-            $exitCode = $status['exitcode'];
-            break;
-        }
-
-        if ($timeout !== null) {
-            $timeout -= (microtime(true) - $start) * 1000000;
-        }
-    }
-
-    proc_terminate($process, 9);
-    $closeStatus = proc_close($process);
-    if ($exitCode === null) {
-        $exitCode = $closeStatus;
-    }
-
-    if ($exitCode !== 0) {
-        throw new \Exception("Failure detected with command '{$command}' - return status {$exitCode}");
-    }
-
-    return [$stdout, $stderr];
-}
-
 function loadLanguage($languageName)
 {
     $baseDir = dirname(__DIR__);
     $language = require "{$baseDir}/languages/${languageName}.php";
 
-    list($imageId) = localExecute('docker images -q ' . escapeshellarg($language['tagName']));
+    list($imageId) = \Hiatus\execX('docker images -q', [$language['tagName']]);
     if ($imageId === '') {
         file_put_contents('php://stderr', "Building image for language {$language['tagName']}.\n");
 
         $baseDir = dirname(__DIR__);
-        localExecute(
-            'docker build -t ' . escapeshellarg($language['tagName']) . ' ' .  escapeshellarg("{$baseDir}/languages/{$language['tagName']}")
-        );
+        \Hiatus\execX('docker build', ['-t' => $language['tagName'], "{$baseDir}/languages/{$language['tagName']}"]);
     }
 
     return $language;
@@ -99,7 +45,7 @@ function createImage($languageName, $script, $constantName = null, $constantValu
 
 function buildImage($baseImage, array $files, array $commands = [])
 {
-    list($tempPath) = localExecute('mktemp -d');
+    list($tempPath) = \Hiatus\execX('mktemp -d');
     $tempPath = trim($tempPath);
     $tempBase = basename($tempPath);
 
@@ -119,7 +65,7 @@ function buildImage($baseImage, array $files, array $commands = [])
         throw new \Exception('Failed to create Dockerfile');
     }
 
-    localExecute('docker build -t ' . escapeshellarg($tempBase) . ' ' . escapeshellarg($tempPath));
+    \Hiatus\execX('docker build', ['-t' => $tempBase, $tempPath]);
     $baseImage['tagName'] = $tempBase;
 
     return $baseImage;
@@ -130,14 +76,14 @@ function execute(array $image)
     $tagName = $image['tagName'];
     $executeCommand = $image['executeCommand'];
     file_put_contents('php://stderr',  "Executing script on docker image {$tagName}\n");
-    list($containerId) = localExecute('docker run -d ' . escapeshellarg($tagName) . ' ' . escapeshellarg($executeCommand) . ' /tmp/userScript');
+    list($containerId) = \Hiatus\execX('docker run -d', [$tagName, $executeCommand, '/tmp/userScript']);
     $containerId = trim($containerId);
 
-    list($exitStatus) = localExecute('docker wait ' . escapeshellarg($containerId), 10);
+    list($exitStatus) = \Hiatus\execX('docker wait', [$containerId], 10);
     $exitStatus = trim($exitStatus);
     $exitStatus = is_numeric($exitStatus) ? (int)$exitStatus : null;
 
-    list($output, $stderr) = localExecute('docker logs ' . escapeshellarg($containerId));
+    list($output, $stderr) = \Hiatus\execX('docker logs', [$containerId]);
 
     return ['exitStatus' => $exitStatus, 'output' => $output, 'stderr' => $stderr];
 }

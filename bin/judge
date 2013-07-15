@@ -3,7 +3,7 @@
 namespace Bizgolf;
 
 $baseDir = dirname(__DIR__);
-require_once "{$baseDir}/src/helpers.php";
+require_once "{$baseDir}/vendor/autoload.php";
 
 $language = $argv[1];
 $holeName = $argv[2];
