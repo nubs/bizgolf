@@ -65,7 +65,12 @@ function buildImage($baseImage, array $files, array $commands = [])
         throw new \Exception('Failed to create Dockerfile');
     }
 
-    \Hiatus\execX('docker build', ['-t' => $tempBase, $tempPath]);
+    list($stdout, $stderr) = \Hiatus\execX('docker build', ['-t' => $tempBase, $tempPath]);
+    list($imageId) = \Hiatus\execX('docker images -q', [$tempBase]);
+    if ($imageId === '') {
+        throw new \Exception("Failed to build image.\nOutput: '{$stdout}'\nStderr: '{$stderr}'");
+    }
+
     $baseImage['tagName'] = $tempBase;
 
     return $baseImage;
