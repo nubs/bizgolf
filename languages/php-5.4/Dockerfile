@@ -1,10 +1,8 @@
 FROM jbgi/arch-base
 MAINTAINER Spencer Rinehart <anubis@overthemonkey.com>
 
-RUN sed -i 's/SigLevel *=.*/SigLevel = Never/' /etc/pacman.conf
-
-RUN pacman -Syy
-RUN pacman -S --noconfirm binutils gcc make
+RUN exec pacman -Syy >/dev/tty 2>/dev/tty </dev/tty
+RUN pacman -S --noconfirm binutils gcc make >/dev/tty 2>/dev/tty </dev/tty
 
 ADD php /tmp/php
 
