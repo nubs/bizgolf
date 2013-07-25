@@ -18,6 +18,6 @@
       "bin/judge"
     ],
     "autoload": {
-      "files": ["src/helpers.php"]
+      "files": ["src/bizgolf.php"]
     }
 }
