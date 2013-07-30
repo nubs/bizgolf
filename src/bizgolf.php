@@ -133,6 +133,7 @@ function loadHole($holeName)
  */
 function judge($hole, $languageName, $script)
 {
+    $hole += ['constantName' => null, 'constantValues' => [], 'disableFunctionality' => [], 'trim' => null];
     $constantValues = is_callable($hole['constantValues']) ? call_user_func($hole['constantValues']) : $hole['constantValues'];
     $constantValues = empty($constantValues) ? [null] : $constantValues;
     foreach ($constantValues as $constantValue) {
