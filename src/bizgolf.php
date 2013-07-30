@@ -139,18 +139,12 @@ function judge($hole, $languageName, $script)
     $checkResult = function($sample, $result) use($hole) {
         $result['sample'] = $sample;
 
-        if ($result['exitStatus'] !== 0) {
-            $result['result'] = false;
-            return $result;
-        }
-
         if ($hole['trim'] !== null) {
             $result['output'] = $hole['trim']($result['output']);
             $result['sample'] = $hole['trim']($result['sample']);
         }
 
-        $result['result'] = $result['output'] === $result['sample'];
-        return $result;
+        return $result + ['result' => $result['exitStatus'] === 0 && $result['output'] === $result['sample']];
     };
 
     if ($constantName !== null && $constantValues !== null) {
