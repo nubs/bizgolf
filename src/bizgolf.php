@@ -189,5 +189,7 @@ function judge($hole, $languageName, $script)
         $result = $checkResult($sample, execute($image));
         $result['constantName'] = null;
         $result['constantValue'] = null;
+
+        return $result;
     }
 }
