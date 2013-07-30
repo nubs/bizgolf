@@ -133,28 +133,24 @@ function loadHole($holeName)
  */
 function judge($hole, $languageName, $script)
 {
-    $executeAndJudge = function($constantName = null, $constantValue = null) use($hole, $languageName, $script) {
+    $constantValues = is_callable($hole['constantValues']) ? call_user_func($hole['constantValues']) : $hole['constantValues'];
+    $constantValues = empty($constantValues) ? [null] : $constantValues;
+    foreach ($constantValues as $constantValue) {
         $sample = is_callable($hole['sample']) ? call_user_func($hole['sample'], $constantValue) : $hole['sample'];
 
-        $image = createImage($languageName, $script, $constantName, $constantValue);
+        $image = createImage($languageName, $script, $hole['constantName'], $constantValue);
         foreach($hole['disableFunctionality'] as $functionality) {
             $image = $image['disableFunctionality']($image, $functionality);
         }
 
-        $result = execute($image) + ['constantName' => $constantName, 'constantValue' => $constantValue, 'sample' => $sample];
+        $result = execute($image) + ['constantName' => $hole['constantName'], 'constantValue' => $constantValue, 'sample' => $sample];
 
         if ($hole['trim'] !== null) {
             $result['output'] = $hole['trim']($result['output']);
             $result['sample'] = $hole['trim']($result['sample']);
         }
 
-        return $result + ['result' => $result['exitStatus'] === 0 && $result['output'] === $result['sample']];
-    };
-
-    $constantValues = is_callable($hole['constantValues']) ? call_user_func($hole['constantValues']) : $hole['constantValues'];
-    $constantValues = empty($constantValues) ? [null] : $constantValues;
-    foreach ($constantValues as $constantValue) {
-        $result = $executeAndJudge($hole['constantName'], $constantValue);
+        $result += ['result' => $result['exitStatus'] === 0 && $result['output'] === $result['sample']];
         if (!$result['result']) {
             return $result;
         }
