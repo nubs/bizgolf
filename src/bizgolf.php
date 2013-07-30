@@ -151,18 +151,14 @@ function judge($hole, $languageName, $script)
         return $result + ['result' => $result['exitStatus'] === 0 && $result['output'] === $result['sample']];
     };
 
-    $constantName = $hole['constantName'];
-    if ($constantName !== null) {
-        $constantValues = is_callable($hole['constantValues']) ? call_user_func($hole['constantValues']) : $hole['constantValues'];
-        foreach ($constantValues as $constantValue) {
-            $result = $executeAndJudge($constantName, $constantValue);
-            if (!$result['result']) {
-                return $result;
-            }
+    $constantValues = is_callable($hole['constantValues']) ? call_user_func($hole['constantValues']) : $hole['constantValues'];
+    $constantValues = empty($constantValues) ? [null] : $constantValues;
+    foreach ($constantValues as $constantValue) {
+        $result = $executeAndJudge($hole['constantName'], $constantValue);
+        if (!$result['result']) {
+            return $result;
         }
-
-        return $result;
-    } else {
-        return $executeAndJudge();
     }
+
+    return $result;
 }
