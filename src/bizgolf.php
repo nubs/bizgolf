@@ -174,10 +174,7 @@ function judge($hole, $languageName, $script)
 
         return $result;
     } else {
-        $sample = $hole['sample'];
-        if (is_callable($sample)) {
-            $sample = call_user_func($sample);
-        }
+        $sample = is_callable($hole['sample']) ? call_user_func($hole['sample']) : $hole['sample'];
 
         $image = createImage($languageName, $script);
         if (!empty($hole['disableFunctionality'])) {
