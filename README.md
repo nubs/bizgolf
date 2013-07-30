@@ -76,12 +76,12 @@ function createImage($language, $script);
  *
  * @param string $holeName One of the included holes.
  * @return array The hole's configuration.  Included fields:
- *     string constantName (optional) The name of the constant that will hold
+ *     string|null constantName The name of the constant that will hold
  *         input.
  *         This may be a callable as well, with 0 arguments.
- *     array constantValues (optional) The different values of input to test.
+ *     array constantValues The different values of input to test.
  *         This may be a callable as well, with 0 arguments.
- *     callable trim (optional) What kind of trim to apply to the results
+ *     callable|null trim What kind of trim to apply to the results
  *         before comparison.
  *     string sample The expected output for the hole.
  *         This may be a callable as well, with 1 argument containing the

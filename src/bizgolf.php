@@ -99,11 +99,11 @@ function execute(array $image)
  *
  * @param string $holeName One of the included holes.
  * @return array The hole's configuration.  Included fields:
- *     string constantName (optional) The name of the constant that will hold input.
+ *     string|null constantName The name of the constant that will hold input.
  *         This may be a callable as well, with 0 arguments.
- *     array constantValues (optional) The different values of input to test.
+ *     array constantValues The different values of input to test.
  *         This may be a callable as well, with 0 arguments.
- *     callable trim (optional) What kind of trim to apply to the results before comparison.
+ *     callable|null trim What kind of trim to apply to the results before comparison.
  *     string sample The expected output for the hole.
  *         This may be a callable as well, with 1 argument containing the constant value for input.
  */
@@ -111,7 +111,9 @@ function loadHole($holeName)
 {
     $baseDir = dirname(__DIR__);
 
-    return require "{$baseDir}/holes/${holeName}.php";
+    $hole = require "{$baseDir}/holes/${holeName}.php";
+
+    return $hole + ['constantName' => null, 'constantValues' => [], 'disableFunctionality' => [], 'trim' => null];
 }
 
 /**
@@ -131,11 +133,8 @@ function loadHole($holeName)
  */
 function judge($hole, $languageName, $script)
 {
-    $constantName = empty($hole['constantName']) ? null : $hole['constantName'];
-    $constantValues = empty($hole['constantValues']) ? null : $hole['constantValues'];
-    if (is_callable($constantValues)) {
-        $constantValues = call_user_func($constantValues);
-    }
+    $constantName = $hole['constantName'];
+    $constantValues = is_callable($hole['constantValues']) ? call_user_func($hole['constantValues']) : $hole['constantValues'];
 
     $checkResult = function($sample, $result) use($hole) {
         $result['sample'] = $sample;
@@ -145,7 +144,7 @@ function judge($hole, $languageName, $script)
             return $result;
         }
 
-        if (array_key_exists('trim', $hole)) {
+        if ($hole['trim'] !== null) {
             $result['output'] = $hole['trim']($result['output']);
             $result['sample'] = $hole['trim']($result['sample']);
         }
@@ -157,10 +156,8 @@ function judge($hole, $languageName, $script)
     if ($constantName !== null && $constantValues !== null) {
         foreach ($constantValues as $constantValue) {
             $image = createImage($languageName, $script, $constantName, $constantValue);
-            if (!empty($hole['disableFunctionality'])) {
-                foreach($hole['disableFunctionality'] as $functionality) {
-                    $image = $image['disableFunctionality']($image, $functionality);
-                }
+            foreach($hole['disableFunctionality'] as $functionality) {
+                $image = $image['disableFunctionality']($image, $functionality);
             }
 
             $result = $checkResult(call_user_func($hole['sample'], $constantValue), execute($image));
@@ -177,10 +174,8 @@ function judge($hole, $languageName, $script)
         $sample = is_callable($hole['sample']) ? call_user_func($hole['sample']) : $hole['sample'];
 
         $image = createImage($languageName, $script);
-        if (!empty($hole['disableFunctionality'])) {
-            foreach($hole['disableFunctionality'] as $functionality) {
-                $image = $image['disableFunctionality']($image, $functionality);
-            }
+        foreach($hole['disableFunctionality'] as $functionality) {
+            $image = $image['disableFunctionality']($image, $functionality);
         }
 
         return $checkResult($sample, execute($image)) + ['constantName' => null, 'constantValue' => null];
