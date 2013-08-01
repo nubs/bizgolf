@@ -122,7 +122,7 @@ There is a limited php command line `judge` command included in the bin director
 judge LANGUAGE HOLE USER_SUBMISSION
 ```
 
-The languages and holes are the file names inside this repository and the user submission is the path to the script to judge.  This command will exit with a status of 0 if the submission passed the hole, and a status of 1 if it did not.
+The languages and holes are the file names inside this repository and the user submission is the path to the script to judge.  This command will exit with a status of `0` if the submission passed the hole, and a status of `1` if it did not.
 
 ## Contributing
 Any changes, suggestions, or bug reports are welcome to be submitted on github.  Pull requests are welcome!
