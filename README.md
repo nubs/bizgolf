@@ -15,14 +15,14 @@ Ideas for events:
 ## Languages Supported
 Right now, just PHP is available, but adding other languages shouldn't be too difficult.  The tricky bit is just in locking the language features down like shell execution, web access, etc., that would allow for "cheating".
 
-* PHP - versions 5.4.16, 5.5.0
+* [PHP](http://www.php.net) - versions [5.4.16](http://www.php.net/ChangeLog-5.php#5.4.16) and [5.5.0](http://www.php.net/ChangeLog-5.php#5.5.0)
 
 ## Included Holes
 A growing list of holes will be included along with this library, making it easy to try out and run an impromptu event.  Adding your own holes is easy too, though.
 
-* 99 Bottles of Beer on the Wall
-* Fizzbuzz
-* Hello World
+* [99 Bottles of Beer on the Wall](holes/99-bottles-of-beer-on-the-wall.php)
+* [Fizzbuzz](holes/fizzbuzz.php)
+* [Hello World](holes/hello-world.php)
 
 ## Requirements
 The host library is currently written in PHP, but it's a small library that could be easily ported to another language.  Some features from php 5.4 are used, so make sure you are running at least 5.4.
