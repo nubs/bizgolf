@@ -23,6 +23,7 @@ A growing list of holes will be included along with this library, making it easy
 * [99 Bottles of Beer on the Wall](holes/99-bottles-of-beer-on-the-wall.php)
 * [Fizzbuzz](holes/fizzbuzz.php)
 * [Hello World](holes/hello-world.php)
+* [Upper Case Words](holes/ucwords.php)
 
 ## Requirements
 The host library is currently written in PHP, but it's a small library that could be easily ported to another language.  Some features from php 5.4 are used, so make sure you are running at least 5.4.
