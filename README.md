@@ -51,15 +51,6 @@ Composer's autoloader will automatically include the functions for use in your p
  * Creates a docker image based on the requested language with the given user
  * script added to the image for execution.
  *
- * @param string $language One of the supported languages.
- * @param string $script The file path to the user's submission to test.
- * @return string The docker image id that was created.
- * @throws Exception if unable to create docker image
- */
-/**
- * Creates a docker image based on the requested language with the given user
- * script added to the image for execution.
- *
  * @param string $languageName One of the supported languages.
  * @param string $script The file path to the user's submission to test.
  * @param string|null $constantName The name of the constant to set, if a
