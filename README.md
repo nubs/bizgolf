@@ -10,7 +10,7 @@ Bizgolf is an attempt to create an open source codegolf library and hosting plat
 Ideas for events:
 * Annual code golf tournament with one active hole at a time.
 * Have a competition between 2 or more development teams.
-* During a hackathon, their could be an ongoing codegolf tournament on the side.
+* During a hackathon, there could be an ongoing codegolf tournament on the side.
 
 ## Languages Supported
 Right now, just PHP is available, but adding other languages shouldn't be too difficult.  The tricky bit is just in locking the language features down like shell execution, web access, etc., that would allow for "cheating".
