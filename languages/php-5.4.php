@@ -20,6 +20,9 @@ EOD;
             case 'upper-case-word':
                 $disableFunctions = ['ucwords', 'ucfirst', 'mb_convert_case'];
                 break;
+            case 'character-counting':
+                $disableFunctions = ['count_chars', 'array_count_values'];
+                break;
         }
 
         if (empty($disableFunctions)) {
