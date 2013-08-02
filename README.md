@@ -138,7 +138,7 @@ A language should include a language definition which is a php script that retur
 There should be a Dockerfile located in languages/`tagName`/Dockerfile that should create a new Docker image with the target language installed and configured to lock down access as described.
 
 ### New Holes
-New holes are a simple php file that returns an array containing the details of what the hole expects.  The below example (taken from fizzbuzz) shows all of the fields that are allowed:
+A bizgolf hole is a simple php file that returns an array containing the details of what the hole expects.  The below example (taken from fizzbuzz) shows some of the fields that are allowed:
 ```php
 <?php
 return [
