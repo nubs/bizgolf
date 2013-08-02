@@ -13,12 +13,12 @@ Ideas for events:
 * During a hackathon, there could be an ongoing codegolf tournament on the side.
 
 ## Languages Supported
-Right now, just PHP is available, but adding other languages shouldn't be too difficult.  The tricky bit is just in locking the language features down like shell execution, web access, etc., that would allow for "cheating".
+Right now, just PHP is available, but [adding](#new-languages) other languages shouldn't be too difficult.  The tricky bit is just in locking the language features down like shell execution, web access, etc., that would allow for "cheating".
 
 * [PHP](http://www.php.net) - versions [5.4.16](http://www.php.net/ChangeLog-5.php#5.4.16) and [5.5.0](http://www.php.net/ChangeLog-5.php#5.5.0)
 
 ## Included Holes
-A growing list of holes will be included along with this library, making it easy to try out and run an impromptu event.  Adding your own holes is easy too, though.
+A growing list of holes will be included along with this library, making it easy to try out and run an impromptu event.  [Adding](#new-holes) your own holes is easy too, though.
 
 * [99 Bottles of Beer on the Wall](holes/99-bottles-of-beer-on-the-wall.php)
 * [Fizzbuzz](holes/fizzbuzz.php)
