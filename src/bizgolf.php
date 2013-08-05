@@ -1,6 +1,19 @@
 <?php
 namespace Bizgolf;
 
+/**
+ * Loads a language specification and builds the docker image for it if it doesn't already exist.
+ *
+ * @param string $languageName The name of the language specification which is the name of the php file in the languages/ directory.
+ * @return array The language specification includes:
+ *     string tagName The name of the docker image tag for the language which is also the name of the directory that contains the Dockerfile.
+ *     callable addConstant A function that takes a user script as a string, a constant name and a constant value and returns the user's script
+ *         modified so that the constant is set to the given value for the execution of the script.
+ *     callable executeCommand The command to execute a script for.  The script filename will be passed as an argument.
+ *     callable disableFunctionality A function that takes an image specification and a string describing the functionality to be disabled.
+ *         This function will disable the described functionality and return a new image specification for the image that won't allow the given
+ *         functionality.
+ */
 function loadLanguage($languageName)
 {
     $baseDir = dirname(__DIR__);
