@@ -56,7 +56,17 @@ function createImage($languageName, $script, $constantName = null, $constantValu
     return buildImage($image, ['/tmp/userScript' => $scriptContents]);
 }
 
-function buildImage($baseImage, array $files, array $commands = [])
+/**
+ * Builds a docker image using the base image specification given, adding any files given, and running any additional Dockerfile commands given.
+ *
+ * @param array $baseImage The base image specification to use.  See createImage() for details.
+ * @param array $files An associative array with the keys being the desired file path on the docker image, and the value being the file's
+ *     contents.
+ * @param array $commands An array of Dockerfile commands to execute.  These need to be escaped already and will be executed via docker build.
+ * @return array The image specification for the resulting image.
+ * @throws \Exception for any failures in building the image.
+ */
+function buildImage(array $baseImage, array $files, array $commands = [])
 {
     list($tempPath) = \Hiatus\execX('mktemp -d');
     $tempPath = trim($tempPath);
