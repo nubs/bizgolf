@@ -171,7 +171,7 @@ function judge($hole, $languageName, $script)
 
         $result = execute($image) + ['constantName' => $hole['constantName'], 'constantValue' => $constantValue, 'sample' => $sample];
 
-        \Hiatus\exec('docker rmi', [$image]);
+        \Hiatus\exec('docker rmi', [$image['tagName']]);
 
         if ($hole['trim'] !== null) {
             $result['output'] = $hole['trim']($result['output']);
