@@ -113,6 +113,8 @@ function execute(array $image)
 
     list($output, $stderr) = \Hiatus\execX('docker logs', [$containerId]);
 
+    \Hiatus\exec('docker rm', [$containerId]);
+
     return ['exitStatus' => $exitStatus, 'output' => $output, 'stderr' => $stderr];
 }
 
