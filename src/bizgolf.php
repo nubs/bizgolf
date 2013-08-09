@@ -99,6 +99,16 @@ function buildImage(array $baseImage, array $files, array $commands = [])
     return $baseImage;
 }
 
+/**
+ * Executes the /tmp/userScript on the docker image given.
+ *
+ * @param array $image An image specification.  The image must be fully prepared and have an executeCommand to provide what command/interpreter
+ *     to use to kick off the user's script.
+ * @return array The result of executing the user's script, including
+ *     int exitStatus The exit status of the user's script
+ *     string output The stdout of the user's script
+ *     string stderr The stderr of the user's script
+ */
 function execute(array $image)
 {
     $tagName = $image['tagName'];
