@@ -60,7 +60,12 @@ Composer's autoloader will automatically include the functions for use in your p
  * @return array A description of the docker image that was created.
  * @throws Exception if unable to create docker image
  */
-function createImage($languageName, $script, $constantName = null, $constantValue = null);
+function createImage(
+    $languageName,
+    $script,
+    $constantName = null,
+    $constantValue = null
+);
 
 /**
  * Loads the hole configuration for an included hole.  If you want to add your
