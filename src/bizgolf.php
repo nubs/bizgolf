@@ -161,7 +161,7 @@ function loadHole($holeName)
  *     string|null constantName The constant's name, if used.
  *     mixed|null constantValue The constant's value, if used.
  */
-function judge($hole, $languageName, $script)
+function judge(array $hole, $languageName, $script)
 {
     $hole += ['constantName' => null, 'constantValues' => [], 'disableFunctionality' => [], 'trim' => null];
     $constantValues = is_callable($hole['constantValues']) ? call_user_func($hole['constantValues']) : $hole['constantValues'];

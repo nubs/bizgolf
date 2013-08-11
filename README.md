@@ -82,7 +82,7 @@ function createImage($languageName, $script, $constantName = null, $constantValu
 function loadHole($holeName);
 
 /**
- * Judges the user submission on the given image against the given hole
+ * Judges the user submission for a language against the given hole
  * configuration.
  *
  * @param array $hole The hole's configuration.  @see loadHole() for details.
@@ -93,13 +93,13 @@ function loadHole($holeName);
  *     bool result Whether the submission passed the tests or not.
  *     int exitStatus The exit status of the command.
  *     string output The output, trimmed according to the rules of the hole.
- *     string sample The expected output, trimmed according to the rules of the
- *         hole.
+ *     string sample The expected output, trimmed according to the rules of
+ *         the hole.
  *     string stderr The stderr output.
  *     string|null constantName The constant's name, if used.
  *     mixed|null constantValue The constant's value, if used.
  */
-function judge($hole, $image);
+function judge(array $hole, $languageName, $script);
 ```
 
 Here's an example of how it could be used to judge a user's submission:
