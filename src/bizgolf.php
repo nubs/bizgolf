@@ -22,8 +22,6 @@ function loadLanguage($languageName)
     list($imageId) = \Hiatus\execX('docker images -q', [$language['tagName']]);
     if ($imageId === '') {
         file_put_contents('php://stderr', "Building image for language {$language['tagName']}.\n");
-
-        $baseDir = dirname(__DIR__);
         \Hiatus\execX('docker build', ['-t' => $language['tagName'], "{$baseDir}/languages/{$language['tagName']}"]);
     }
 
@@ -144,10 +142,7 @@ function execute(array $image)
  */
 function loadHole($holeName)
 {
-    $baseDir = dirname(__DIR__);
-
-    $hole = require "{$baseDir}/holes/${holeName}.php";
-
+    $hole = require dirname(__DIR__) . "/holes/${holeName}.php";
     return $hole + ['constantName' => null, 'constantValues' => [], 'disableFunctionality' => [], 'trim' => null];
 }
 
