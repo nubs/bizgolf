@@ -18,6 +18,7 @@ function loadLanguage($languageName)
 {
     $baseDir = dirname(__DIR__);
     $language = require "{$baseDir}/languages/${languageName}.php";
+    $language = $language();
 
     list($imageId) = \Hiatus\execX('docker images -q', [$language['tagName']]);
     if ($imageId === '') {
