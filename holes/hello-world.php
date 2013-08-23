@@ -1,5 +1,7 @@
 <?php
-return [
-    'trim' => 'trim',
-    'sample' => 'Hello, World!',
-];
+return function() {
+    return [
+        'trim' => 'trim',
+        'sample' => 'Hello, World!',
+    ];
+};
