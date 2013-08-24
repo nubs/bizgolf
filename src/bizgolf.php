@@ -143,8 +143,9 @@ function execute(array $image)
  */
 function loadHole($holeName)
 {
+    $helpers = require 'helpers.php';
     $hole = require dirname(__DIR__) . "/holes/${holeName}.php";
-    $hole = $hole();
+    $hole = $hole($helpers());
     return $hole + ['constantName' => null, 'constantValues' => [], 'disableFunctionality' => [], 'trim' => null];
 }
 
