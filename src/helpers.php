@@ -17,7 +17,7 @@ return function() {
             $length = rand(5, 20);
             for ($i = 0; $i < $length; $i++) {
                 $word = $randomWord();
-                if (rand(0, 5) === ',') {
+                if (rand(0, 5) === 0) {
                     $word .= ',';
                 }
 
