@@ -71,7 +71,8 @@ function createImage(
  * Loads the hole configuration for an included hole.  If you want to add your
  * own holes outside of this project, you don't need to call this function.
  *
- * @param string $holeName One of the included holes.
+ * @param string|callable $hole One of the included holes specified by name, or
+       a hole specification wrapped in a closure.
  * @return array The hole's configuration.  Included fields:
  *     string|null constantName The name of the constant that will hold
  *         input.
@@ -84,7 +85,7 @@ function createImage(
  *         This may be a callable as well, with 1 argument containing the
            constant value for input.
  */
-function loadHole($holeName);
+function loadHole($hole);
 
 /**
  * Judges the user submission for a language against the given hole

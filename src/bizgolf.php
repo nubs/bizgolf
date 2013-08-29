@@ -131,7 +131,7 @@ function execute(array $image)
  * Loads the hole configuration for an included hole.  If you want to add your own holes outside of this project, you don't need to call this
  * function.
  *
- * @param string $holeName One of the included holes.
+ * @param string|callable $hole One of the included holes specified by name, or a hole specification wrapped in a closure.
  * @return array The hole's configuration.  Included fields:
  *     string|null constantName The name of the constant that will hold input.
  *         This may be a callable as well, with 0 arguments.
@@ -141,10 +141,13 @@ function execute(array $image)
  *     string sample The expected output for the hole.
  *         This may be a callable as well, with 1 argument containing the constant value for input.
  */
-function loadHole($holeName)
+function loadHole($hole)
 {
+    if (is_string($hole)) {
+        $hole = require dirname(__DIR__) . "/holes/${holeName}.php";
+    }
+
     $helpers = require 'helpers.php';
-    $hole = require dirname(__DIR__) . "/holes/${holeName}.php";
     $hole = $hole($helpers());
     return $hole + ['constantName' => null, 'constantValues' => [], 'disableFunctionality' => [], 'trim' => null];
 }
