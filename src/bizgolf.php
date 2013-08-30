@@ -147,8 +147,11 @@ function loadHole($hole)
         $hole = require dirname(__DIR__) . "/holes/${holeName}.php";
     }
 
-    $helpers = require 'helpers.php';
-    $hole = $hole($helpers());
+    if (is_callable($hole)) {
+        $helpers = require 'helpers.php';
+        $hole = $hole($helpers());
+    }
+
     return $hole + ['constantName' => null, 'constantValues' => [], 'disableFunctionality' => [], 'trim' => null];
 }
 
