@@ -27,5 +27,5 @@ return function() {
             $punctuation = '.!?';
             return implode(' ', $words) . $punctuation[rand(0, strlen($punctuation) - 1)];
         },
-    ]
+    ];
 };
