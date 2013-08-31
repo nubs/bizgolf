@@ -1,6 +1,11 @@
 <?php
 namespace Bizgolf;
 
+function dockerRequest($path)
+{
+    return file_get_contents("http://localhost:4243/v1.4/{$path}", false, ['http' => ['method' => 'POST']]);
+}
+
 /**
  * Loads a language specification and builds the docker image for it if it doesn't already exist.
  *
@@ -20,10 +25,10 @@ function loadLanguage($languageName)
     $language = require "{$baseDir}/languages/${languageName}.php";
     $language = $language();
 
-    list($imageId) = \Hiatus\execX('docker images -q', [$language['tagName']]);
+    $imageId = dockerRequest('images/json?filter=' . urlencode($language['tagName']));
     if ($imageId === '') {
         file_put_contents('php://stderr', "Building image for language {$language['tagName']}.\n");
-        \Hiatus\execX('docker build', ['-t' => $language['tagName'], "{$baseDir}/languages/{$language['tagName']}"]);
+        \Hiatus\execX('docker -H tcp://localhost:4243 build', ['-t' => $language['tagName'], "{$baseDir}/languages/{$language['tagName']}"]);
     }
 
     return $language;
@@ -87,8 +92,8 @@ function buildImage(array $baseImage, array $files, array $commands = [])
         throw new \Exception('Failed to create Dockerfile');
     }
 
-    list($stdout, $stderr) = \Hiatus\execX('docker build', ['-t' => $tempBase, $tempPath]);
-    list($imageId) = \Hiatus\execX('docker images -q', [$tempBase]);
+    list($stdout, $stderr) = \Hiatus\execX('docker -H tcp://localhost:4243 build', ['-t' => $tempBase, $tempPath]);
+    $imageId = dockerRequest('images/json?filter=' . urlencode($tempBase));
     if ($imageId === '') {
         throw new \Exception("Failed to build image.\nOutput: '{$stdout}'\nStderr: '{$stderr}'");
     }
@@ -113,16 +118,17 @@ function execute(array $image)
     $tagName = $image['tagName'];
     $executeCommand = $image['executeCommand'];
     file_put_contents('php://stderr',  "Executing script on docker image {$tagName}\n");
-    list($containerId) = \Hiatus\execX('docker run -d', [$tagName, $executeCommand, '/tmp/userScript']);
+    list($containerId) = \Hiatus\execX('docker -H tcp://localhost:4243 run -d', [$tagName, $executeCommand, '/tmp/userScript']);
     $containerId = trim($containerId);
 
-    list($exitStatus) = \Hiatus\execX('docker wait', [$containerId], 10);
+    list($exitStatus) = \Hiatus\execX('docker -H tcp://localhost:4243 wait', [$containerId], 10);
     $exitStatus = trim($exitStatus);
     $exitStatus = is_numeric($exitStatus) ? (int)$exitStatus : null;
 
-    list($output, $stderr) = \Hiatus\execX('docker logs', [$containerId]);
+    $output = dockerRequest('containers/' . urlencode($containerId) . '/attach?logs=1&stdout=1');
+    $stderr = dockerRequest('containers/' . urlencode($containerId) . '/attach?logs=1&stderr=1');
 
-    \Hiatus\exec('docker rm', [$containerId]);
+    \Hiatus\exec('docker -H tcp://localhost:4243 rm', [$containerId]);
 
     return ['exitStatus' => $exitStatus, 'output' => $output, 'stderr' => $stderr];
 }
@@ -185,7 +191,7 @@ function judge(array $hole, $languageName, $script)
 
         $result = execute($image) + ['constantName' => $hole['constantName'], 'constantValue' => $constantValue, 'sample' => $sample];
 
-        \Hiatus\exec('docker rmi', [$image['tagName']]);
+        \Hiatus\exec('docker -H tcp://localhost:4243 rmi', [$image['tagName']]);
 
         if ($hole['trim'] !== null) {
             $result['output'] = $hole['trim']($result['output']);
