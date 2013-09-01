@@ -1,9 +1,9 @@
 <?php
 namespace Bizgolf;
 
-function dockerRequest($path)
+function dockerRequest($path, $method = 'GET')
 {
-    return file_get_contents("http://localhost:4243/v1.4/{$path}", false, stream_context_create(['http' => ['method' => 'POST']]));
+    return file_get_contents("http://localhost:4243/v1.4/{$path}", false, stream_context_create(['http' => ['method' => $method]]));
 }
 
 /**
@@ -125,8 +125,8 @@ function execute(array $image)
     $exitStatus = trim($exitStatus);
     $exitStatus = is_numeric($exitStatus) ? (int)$exitStatus : null;
 
-    $output = dockerRequest('containers/' . urlencode($containerId) . '/attach?logs=1&stdout=1');
-    $stderr = dockerRequest('containers/' . urlencode($containerId) . '/attach?logs=1&stderr=1');
+    $output = dockerRequest('containers/' . urlencode($containerId) . '/attach?logs=1&stdout=1', 'POST');
+    $stderr = dockerRequest('containers/' . urlencode($containerId) . '/attach?logs=1&stderr=1', 'POST');
 
     \Hiatus\exec('docker -H tcp://localhost:4243 rm', [$containerId]);
 
