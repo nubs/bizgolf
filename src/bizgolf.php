@@ -3,7 +3,7 @@ namespace Bizgolf;
 
 function dockerRequest($path)
 {
-    return file_get_contents("http://localhost:4243/v1.4/{$path}", false, ['http' => ['method' => 'POST']]);
+    return file_get_contents("http://localhost:4243/v1.4/{$path}", false, stream_context_create(['http' => ['method' => 'POST']]));
 }
 
 /**
