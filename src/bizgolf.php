@@ -128,7 +128,7 @@ function execute(array $image)
     $output = dockerRequest('containers/' . urlencode($containerId) . '/attach?logs=1&stdout=1', 'POST');
     $stderr = dockerRequest('containers/' . urlencode($containerId) . '/attach?logs=1&stderr=1', 'POST');
 
-    \Hiatus\exec('docker -H tcp://localhost:4243 rm', [$containerId]);
+    dockerRequest('containers/' . urlencode($containerId), 'DELETE');
 
     return ['exitStatus' => $exitStatus, 'output' => $output, 'stderr' => $stderr];
 }
@@ -191,7 +191,7 @@ function judge(array $hole, $languageName, $script)
 
         $result = execute($image) + ['constantName' => $hole['constantName'], 'constantValue' => $constantValue, 'sample' => $sample];
 
-        \Hiatus\exec('docker -H tcp://localhost:4243 rmi', [$image['tagName']]);
+        dockerRequest('images/' . urlencode($image['tagName']), 'DELETE');
 
         if ($hole['trim'] !== null) {
             $result['output'] = $hole['trim']($result['output']);
