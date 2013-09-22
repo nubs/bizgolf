@@ -39,12 +39,11 @@ function loadLanguage($languageName)
  *
  * @param string $languageName One of the supported languages.
  * @param string $script The file path to the user's submission to test.
- * @param string|null $constantName The name of the constant to set, if a constant is being used.
- * @param mixed|null $constantValue The value of the constant to set, if a constant is being used.
+ * @param array $constants An array of constants to set.
  * @return array A description of the docker image that was created.
  * @throws Exception if unable to create docker image
  */
-function createImage($languageName, $script, $constantName = null, $constantValue = null)
+function createImage($languageName, $script, array $constants)
 {
     $image = loadLanguage($languageName);
 
@@ -53,7 +52,7 @@ function createImage($languageName, $script, $constantName = null, $constantValu
         throw new \Exception('Failed to read user script.');
     }
 
-    if ($constantName !== null) {
+    foreach ($constants as $constantName => $constantValue) {
         $scriptContents = $image['addConstant']($scriptContents, $constantName, $constantValue);
     }
 
@@ -139,18 +138,16 @@ function execute(array $image)
  *
  * @param string|callable $hole One of the included holes specified by name, or a hole specification wrapped in a closure.
  * @return array The hole's configuration.  Included fields:
- *     string|null constantName The name of the constant that will hold input.
- *         This may be a callable as well, with 0 arguments.
- *     array constantValues The different values of input to test.
- *         This may be a callable as well, with 0 arguments.
+ *     array constants The constants that will be used.
+ *         Each constant's value may be a callable as well, with 0 arguments.
  *     callable|null trim What kind of trim to apply to the results before comparison.
  *     string sample The expected output for the hole.
- *         This may be a callable as well, with 1 argument containing the constant value for input.
+ *         This may be a callable as well, with 1 argument for each constant value for input.
  */
 function loadHole($hole)
 {
     if (is_string($hole)) {
-        $hole = require dirname(__DIR__) . "/holes/${holeName}.php";
+        $hole = require dirname(__DIR__) . "/holes/${hole}.php";
     }
 
     if (is_callable($hole)) {
@@ -158,7 +155,7 @@ function loadHole($hole)
         $hole = $hole($helpers());
     }
 
-    return $hole + ['constantName' => null, 'constantValues' => [], 'disableFunctionality' => [], 'trim' => null];
+    return $hole + ['constants' => [], 'disableFunctionality' => [], 'trim' => null];
 }
 
 /**
@@ -173,23 +170,38 @@ function loadHole($hole)
  *     string output The output, trimmed according to the rules of the hole.
  *     string sample The expected output, trimmed according to the rules of the hole.
  *     string stderr The stderr output.
- *     string|null constantName The constant's name, if used.
- *     mixed|null constantValue The constant's value, if used.
+ *     array constants The constants' used, if any.
  */
 function judge(array $hole, $languageName, $script)
 {
-    $hole += ['constantName' => null, 'constantValues' => [], 'disableFunctionality' => [], 'trim' => null];
-    $constantValues = is_callable($hole['constantValues']) ? call_user_func($hole['constantValues']) : $hole['constantValues'];
-    $constantValues = empty($constantValues) ? [null] : $constantValues;
-    foreach ($constantValues as $constantValue) {
-        $sample = is_callable($hole['sample']) ? call_user_func($hole['sample'], $constantValue) : $hole['sample'];
+    $hole += ['constants' => [], 'disableFunctionality' => [], 'trim' => null];
+    $maxValues = 0;
+    $allConstantValues = [];
+    foreach ($hole['constants'] as $constantName => $constantValueFn) {
+        $allConstantValues[$constantName] = is_callable($constantValueFn) ? call_user_func($constantValueFn) : $constantValueFn;
+        $maxValues = max($maxValues, count($allConstantValues[$constantName]));
+    }
 
-        $image = createImage($languageName, $script, $hole['constantName'], $constantValue);
+    $allConstants = [];
+    foreach ($allConstantValues as $constantName => $constantValues) {
+        for ($i = 0; $i < $maxValues; $i++) {
+            $allConstants[$i][$constantName] = $constantValues[$i % count($constantValues)];
+        }
+    }
+
+    if (empty($allConstants)) {
+        $allConstants = [[]];
+    }
+
+    foreach ($allConstants as $constants) {
+        $sample = is_callable($hole['sample']) ? call_user_func_array($hole['sample'], $constants) : $hole['sample'];
+
+        $image = createImage($languageName, $script, $constants);
         foreach($hole['disableFunctionality'] as $functionality) {
             $image = $image['disableFunctionality']($image, $functionality);
         }
 
-        $result = execute($image) + ['constantName' => $hole['constantName'], 'constantValue' => $constantValue, 'sample' => $sample];
+        $result = execute($image) + ['constants' => $constants, 'sample' => $sample];
 
         dockerRequest('images/' . urlencode($image['tagName']), 'DELETE');
 
@@ -198,7 +210,7 @@ function judge(array $hole, $languageName, $script)
             $result['sample'] = $hole['trim']($result['sample']);
         }
 
-        $result += ['result' => $result['exitStatus'] === 0 && $result['output'] === $result['sample']];
+        $result['result'] = $result['exitStatus'] === 0 && $result['output'] === $result['sample'];
         if (!$result['result']) {
             return $result;
         }
