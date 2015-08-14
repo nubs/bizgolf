@@ -180,4 +180,5 @@ return [
 Try to make sure that your hole will provide an appropriate challenge and could work well in many languages.
 
 ## License
-This project is licensed under the MIT License.
+bizgolf is licensed under the MIT license.  See [LICENSE](LICENSE) for the
+full license text.
